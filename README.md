@@ -79,6 +79,14 @@ Sheet 컬럼 예시:
 timestamp, puzzleId, teamName, round, maxRounds, filledCells, correctCells, incorrectCells, totalCells, isPerfect, answersJson, userAgent
 ```
 
+## 리더보드
+
+제출 화면의 `리더보드` 버튼 또는 `#/leaderboard` 주소에서 팀별 순위를 볼 수 있습니다. 순위는 `맞춘 개수`가 많은 순서, 동점이면 `제출 시각`이 빠른 순서입니다.
+
+`VITE_SUBMISSION_ENDPOINT`가 설정되어 있으면 Google Sheet 전체 제출 기록을 기준으로 보여줍니다. endpoint가 없으면 현재 브라우저의 localStorage 기록만 표시합니다.
+
+관리자 초기화를 쓰려면 Apps Script의 Script Properties에 `ADMIN_CODE`를 추가하세요. 리더보드 화면에서 `초기화` 버튼을 누르고 이 코드를 입력하면 해당 퍼즐의 리더보드 제출 기록이 삭제됩니다.
+
 ## GitHub Pages 배포
 
 `.github/workflows/deploy.yml`이 포함되어 있습니다.

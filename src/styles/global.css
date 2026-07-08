@@ -52,6 +52,15 @@ button {
   background: rgba(255, 255, 255, 0.92);
 }
 
+.header-actions,
+.leaderboard-tools {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .header-mark {
   display: inline-grid;
   width: 44px;
@@ -384,7 +393,8 @@ h1 {
 }
 
 .primary-action,
-.secondary-action {
+.secondary-action,
+.danger-action {
   display: inline-flex;
   min-height: 42px;
   align-items: center;
@@ -414,6 +424,108 @@ h1 {
 .secondary-action:hover:not(:disabled) {
   border-color: #94a3b8;
   background: #f8fafc;
+}
+
+.danger-action {
+  color: #991b1b;
+  background: #fff;
+  border-color: #fecaca;
+}
+
+.danger-action:hover:not(:disabled) {
+  border-color: #f87171;
+  background: #fef2f2;
+}
+
+.danger-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.compact-action {
+  min-height: 38px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.leaderboard-page {
+  min-height: 100vh;
+}
+
+.leaderboard-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 22px clamp(16px, 4vw, 36px);
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.leaderboard-main {
+  width: min(980px, calc(100% - 28px));
+  margin: 22px auto 40px;
+}
+
+.leaderboard-message {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  color: #174ea6;
+  background: #eff6ff;
+  font-weight: 700;
+}
+
+.leaderboard-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.leaderboard-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  border-bottom: 1px solid #e5eaf3;
+  padding: 13px 14px;
+  text-align: left;
+}
+
+.leaderboard-table th {
+  color: var(--muted);
+  background: #f8fafc;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.leaderboard-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.leaderboard-table td:first-child,
+.leaderboard-table th:first-child {
+  width: 74px;
+}
+
+.rank-cell {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: #174ea6;
+  font-weight: 900;
+}
+
+.leaderboard-empty {
+  padding: 38px 16px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 800;
 }
 
 .modal-backdrop {
@@ -508,9 +620,17 @@ h1 {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .cell-count-badge {
+  .header-actions {
     grid-column: 1 / -1;
     justify-self: start;
+  }
+
+  .leaderboard-header {
+    grid-template-columns: 1fr;
+  }
+
+  .leaderboard-tools {
+    justify-content: start;
   }
 
   h1 {

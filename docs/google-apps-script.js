@@ -1,9 +1,57 @@
+const HEADER = [
+  "timestamp",
+  "puzzleId",
+  "teamName",
+  "round",
+  "maxRounds",
+  "filledCells",
+  "correctCells",
+  "incorrectCells",
+  "totalCells",
+  "isPerfect",
+  "answersJson",
+  "userAgent"
+];
+
+function doGet(e) {
+  try {
+    const action = e.parameter.action || "leaderboard";
+
+    if (action === "leaderboard") {
+      return jsonResponse({
+        ok: true,
+        entries: getLeaderboardEntries(e.parameter.puzzleId)
+      });
+    }
+
+    return jsonResponse({ ok: false, error: "Unknown action" });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: String(error.message || error) });
+  }
+}
+
 function doPost(e) {
+  try {
+    const payload = JSON.parse(e.postData.contents);
+
+    if (payload.action === "resetLeaderboard") {
+      resetLeaderboard(payload.puzzleId, payload.adminCode);
+      return jsonResponse({ ok: true });
+    }
+
+    appendSubmission(payload);
+    return jsonResponse({ ok: true });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: String(error.message || error) });
+  }
+}
+
+function appendSubmission(payload) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const payload = JSON.parse(e.postData.contents);
+  ensureHeader(sheet);
 
   sheet.appendRow([
-    new Date(),
+    new Date(payload.submittedAt || new Date()),
     payload.puzzleId,
     payload.teamName,
     payload.round,
@@ -16,8 +64,125 @@ function doPost(e) {
     JSON.stringify(payload.answers),
     payload.userAgent || ""
   ]);
+}
 
+function getLeaderboardEntries(puzzleId) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  ensureHeader(sheet);
+
+  const rows = getDataRows(sheet);
+  const teamMap = {};
+
+  rows.forEach((row) => {
+    if (puzzleId && row[1] !== puzzleId) return;
+
+    const teamName = row[2];
+    if (!teamName) return;
+
+    const submittedAt = toIsoString(row[0]);
+    const round = Number(row[3] || 0);
+    const maxRounds = Number(row[4] || 5);
+    const correctCells = Number(row[6] || 0);
+    const totalCells = Number(row[8] || 0);
+
+    if (!teamMap[teamName]) {
+      teamMap[teamName] = {
+        teamName,
+        submissions: 0,
+        best: null,
+        maxRounds
+      };
+    }
+
+    teamMap[teamName].submissions += 1;
+    teamMap[teamName].maxRounds = maxRounds || teamMap[teamName].maxRounds;
+
+    const candidate = {
+      teamName,
+      correctCells,
+      totalCells,
+      remainingRounds: 0,
+      submittedAt,
+      submissionCount: 0,
+      round
+    };
+
+    const currentBest = teamMap[teamName].best;
+    if (
+      !currentBest ||
+      candidate.correctCells > currentBest.correctCells ||
+      (candidate.correctCells === currentBest.correctCells &&
+        new Date(candidate.submittedAt).getTime() < new Date(currentBest.submittedAt).getTime())
+    ) {
+      teamMap[teamName].best = candidate;
+    }
+  });
+
+  return Object.keys(teamMap)
+    .map((teamName) => {
+      const record = teamMap[teamName];
+      const best = record.best;
+      best.submissionCount = record.submissions;
+      best.remainingRounds = Math.max(0, record.maxRounds - record.submissions);
+      return best;
+    })
+    .sort((a, b) => {
+      return (
+        b.correctCells - a.correctCells ||
+        new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime()
+      );
+    });
+}
+
+function resetLeaderboard(puzzleId, adminCode) {
+  const configuredCode = PropertiesService.getScriptProperties().getProperty("ADMIN_CODE");
+  if (!configuredCode) {
+    throw new Error("ADMIN_CODE is not configured in Script Properties.");
+  }
+  if (adminCode !== configuredCode) {
+    throw new Error("Invalid admin code.");
+  }
+
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  ensureHeader(sheet);
+
+  const rows = getDataRows(sheet);
+  const remainingRows = rows.filter((row) => puzzleId && row[1] !== puzzleId);
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, 1, HEADER.length).setValues([HEADER]);
+
+  if (remainingRows.length > 0) {
+    sheet.getRange(2, 1, remainingRows.length, HEADER.length).setValues(remainingRows);
+  }
+}
+
+function ensureHeader(sheet) {
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, HEADER.length).setValues([HEADER]);
+    return;
+  }
+
+  const firstRow = sheet.getRange(1, 1, 1, HEADER.length).getValues()[0];
+  if (firstRow[0] !== HEADER[0]) {
+    sheet.insertRowBefore(1);
+    sheet.getRange(1, 1, 1, HEADER.length).setValues([HEADER]);
+  }
+}
+
+function getDataRows(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  return sheet.getRange(2, 1, lastRow - 1, HEADER.length).getValues();
+}
+
+function toIsoString(value) {
+  if (value instanceof Date) return value.toISOString();
+  return new Date(value).toISOString();
+}
+
+function jsonResponse(payload) {
   return ContentService
-    .createTextOutput(JSON.stringify({ ok: true }))
+    .createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
 }

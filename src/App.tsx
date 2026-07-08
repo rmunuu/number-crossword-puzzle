@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ClueList } from "./components/ClueList";
 import { Header } from "./components/Header";
 import { InputPad } from "./components/InputPad";
+import { LeaderboardPage } from "./components/LeaderboardPage";
 import { ProgressBar } from "./components/ProgressBar";
 import { PuzzleGrid } from "./components/PuzzleGrid";
 import { SubmissionHistory } from "./components/SubmissionHistory";
@@ -41,7 +42,11 @@ function getCellStatuses(answers: Record<number, CellValue>): Record<number, "co
   ) as Record<number, "correct" | "incorrect">;
 }
 
-export default function App() {
+interface SubmitAppProps {
+  onOpenLeaderboard: () => void;
+}
+
+function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
   const [teamName, setTeamName] = useState("");
   const [modal, setModal] = useState<ModalState | null>(null);
   const [lastScore, setLastScore] = useState<ScoreResult | null>(null);
@@ -203,7 +208,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Header totalCells={puzzle.totalCells} />
+      <Header onOpenLeaderboard={onOpenLeaderboard} totalCells={puzzle.totalCells} />
 
       <main className="app-main">
         <section className="control-band">
@@ -261,4 +266,37 @@ export default function App() {
       />
     </div>
   );
+}
+
+function getCurrentRoute(): "submit" | "leaderboard" {
+  return window.location.hash === "#/leaderboard" ? "leaderboard" : "submit";
+}
+
+export default function App() {
+  const [route, setRoute] = useState<"submit" | "leaderboard">(getCurrentRoute);
+
+  useEffect(() => {
+    function handleHashChange() {
+      setRoute(getCurrentRoute());
+    }
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const openLeaderboard = useCallback(() => {
+    window.location.hash = "/leaderboard";
+    setRoute("leaderboard");
+  }, []);
+
+  const openSubmit = useCallback(() => {
+    window.location.hash = "";
+    setRoute("submit");
+  }, []);
+
+  if (route === "leaderboard") {
+    return <LeaderboardPage onBack={openSubmit} />;
+  }
+
+  return <SubmitApp onOpenLeaderboard={openLeaderboard} />;
 }
