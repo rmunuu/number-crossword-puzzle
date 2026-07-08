@@ -1,5 +1,6 @@
 import { puzzle } from "../data/puzzle";
 import { teams } from "../data/teams";
+import { applyGameReset, clearLocalGameState } from "./gameReset";
 import { MAX_SUBMISSION_ROUNDS, loadSubmissionHistory, type SubmissionRecord } from "./submissionHistory";
 
 export interface LeaderboardEntry {
@@ -14,6 +15,7 @@ export interface LeaderboardEntry {
 
 export interface LeaderboardResult {
   entries: LeaderboardEntry[];
+  resetAt?: string;
   source: "endpoint" | "local";
 }
 
@@ -128,6 +130,12 @@ function normalizeEndpointEntries(value: unknown): LeaderboardEntry[] {
     .sort(compareLeaderboardEntries);
 }
 
+function getEndpointResetAt(value: unknown): string | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const resetAt = (value as { resetAt?: unknown }).resetAt;
+  return typeof resetAt === "string" ? resetAt : undefined;
+}
+
 export async function loadLeaderboard(): Promise<LeaderboardResult> {
   const endpoint = import.meta.env.VITE_SUBMISSION_ENDPOINT?.trim();
 
@@ -155,8 +163,12 @@ export async function loadLeaderboard(): Promise<LeaderboardResult> {
     throw new Error((payload as { error?: string }).error ?? "리더보드를 불러오지 못했습니다.");
   }
 
+  const resetAt = getEndpointResetAt(payload);
+  applyGameReset(resetAt);
+
   return {
     entries: normalizeEndpointEntries(payload),
+    resetAt,
     source: "endpoint"
   };
 }
@@ -165,9 +177,7 @@ export async function resetLeaderboard(adminCode: string): Promise<void> {
   const endpoint = import.meta.env.VITE_SUBMISSION_ENDPOINT?.trim();
 
   if (!endpoint) {
-    for (const teamName of teams) {
-      window.localStorage.removeItem(`${puzzle.puzzleId}:${teamName}:submissions`);
-    }
+    clearLocalGameState();
     return;
   }
 
@@ -187,8 +197,14 @@ export async function resetLeaderboard(adminCode: string): Promise<void> {
     throw new Error(`Reset failed: ${response.status}`);
   }
 
-  const payload = (await response.json()) as { ok?: boolean; error?: string };
+  const payload = (await response.json()) as { ok?: boolean; error?: string; resetAt?: string };
   if (payload.ok === false) {
     throw new Error(payload.error ?? "리더보드를 초기화하지 못했습니다.");
+  }
+
+  if (payload.resetAt) {
+    applyGameReset(payload.resetAt);
+  } else {
+    clearLocalGameState();
   }
 }

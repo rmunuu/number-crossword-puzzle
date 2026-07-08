@@ -98,7 +98,7 @@ timestamp, puzzleId, teamName, round, maxRounds, filledCells, correctCells, inco
 
 `VITE_SUBMISSION_ENDPOINT`가 설정되어 있으면 Google Sheet 전체 제출 기록을 기준으로 보여줍니다. endpoint가 없으면 현재 브라우저의 localStorage 기록만 표시합니다.
 
-관리자 초기화를 쓰려면 리더보드 화면에서 `초기화` 버튼을 누르고 Script Properties에 넣은 `ADMIN_CODE`를 입력하면 됩니다.
+관리자 초기화는 전체 게임 초기화입니다. 리더보드 화면에서 `초기화` 버튼을 누르고 Script Properties에 넣은 `ADMIN_CODE`를 입력하면 Google Sheet 제출 기록이 삭제되고, 각 브라우저는 reset 상태를 감지해 모든 팀의 입력 답안과 제출 기록을 지웁니다. 제출 화면과 리더보드 화면은 10초마다 reset 상태를 확인합니다.
 
 ## GitHub Pages 배포
 

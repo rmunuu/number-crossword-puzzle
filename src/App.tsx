@@ -16,6 +16,7 @@ import { solution } from "./data/solution";
 import { clearProgress, loadProgress, saveProgress } from "./hooks/useLocalStorage";
 import { useKeyboardInput } from "./hooks/useKeyboardInput";
 import { usePuzzleInput } from "./hooks/usePuzzleInput";
+import { syncRemoteGameReset } from "./utils/gameReset";
 import { scoreAnswers, type ScoreResult } from "./utils/scoring";
 import { createSubmissionPayload, submitPayload } from "./utils/submission";
 import {
@@ -92,6 +93,33 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
     if (!teamName) return;
     saveProgress(puzzle.puzzleId, teamName, answers);
   }, [answers, teamName]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncResetState() {
+      try {
+        const wasReset = await syncRemoteGameReset();
+        if (!wasReset || cancelled) return;
+
+        resetAnswers({});
+        setSubmissionHistory([]);
+        setReviewRecordId(null);
+        setLastScore(null);
+        setModal(null);
+      } catch (error) {
+        console.warn("Game reset sync failed", error);
+      }
+    }
+
+    void syncResetState();
+    const syncIntervalId = window.setInterval(syncResetState, 10_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(syncIntervalId);
+    };
+  }, [resetAnswers]);
 
   const handleTeamChange = useCallback(
     (nextTeamName: string) => {

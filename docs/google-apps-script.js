@@ -15,6 +15,7 @@ const HEADER = [
 
 const DEFAULT_SHEET_NAME = "Submissions";
 const TIMESTAMP_MODE = "iso-text-v2";
+const RESET_AT_PROPERTY_PREFIX = "RESET_AT:";
 
 function doGet(e) {
   try {
@@ -23,8 +24,16 @@ function doGet(e) {
     if (action === "leaderboard") {
       return jsonResponse({
         ok: true,
+        resetAt: getGameResetAt(e.parameter.puzzleId),
         timestampMode: TIMESTAMP_MODE,
         entries: getLeaderboardEntries(e.parameter.puzzleId)
+      });
+    }
+
+    if (action === "state") {
+      return jsonResponse({
+        ok: true,
+        resetAt: getGameResetAt(e.parameter.puzzleId)
       });
     }
 
@@ -39,8 +48,8 @@ function doPost(e) {
     const payload = JSON.parse(e.postData.contents);
 
     if (payload.action === "resetLeaderboard") {
-      resetLeaderboard(payload.puzzleId, payload.adminCode);
-      return jsonResponse({ ok: true });
+      const resetAt = resetLeaderboard(payload.puzzleId, payload.adminCode);
+      return jsonResponse({ ok: true, resetAt });
     }
 
     appendSubmission(payload);
@@ -70,6 +79,24 @@ function getSubmissionSpreadsheet() {
   }
 
   return spreadsheet;
+}
+
+function getResetPropertyKey(puzzleId) {
+  return RESET_AT_PROPERTY_PREFIX + (puzzleId || "all");
+}
+
+function getGameResetAt(puzzleId) {
+  return PropertiesService
+    .getScriptProperties()
+    .getProperty(getResetPropertyKey(puzzleId)) || "";
+}
+
+function saveGameResetAt(puzzleId) {
+  const resetAt = new Date().toISOString();
+  PropertiesService
+    .getScriptProperties()
+    .setProperty(getResetPropertyKey(puzzleId), resetAt);
+  return resetAt;
 }
 
 function appendSubmission(payload) {
@@ -184,6 +211,8 @@ function resetLeaderboard(puzzleId, adminCode) {
   if (remainingRows.length > 0) {
     sheet.getRange(2, 1, remainingRows.length, HEADER.length).setValues(remainingRows);
   }
+
+  return saveGameResetAt(puzzleId);
 }
 
 function ensureHeader(sheet) {
