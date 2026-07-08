@@ -1,4 +1,4 @@
-import { RotateCcw, Send } from "lucide-react";
+import { HelpCircle, RotateCcw, Send } from "lucide-react";
 
 interface SubmitPanelProps {
   disabled: boolean;
@@ -7,6 +7,7 @@ interface SubmitPanelProps {
   maxSubmissions: number;
   onExitReview: () => void;
   onReset: () => void;
+  onShowGuide: () => void;
   onSubmit: () => void;
   reviewMode: boolean;
   submissionCount: number;
@@ -21,6 +22,7 @@ export function SubmitPanel({
   maxSubmissions,
   onExitReview,
   onReset,
+  onShowGuide,
   onSubmit,
   reviewMode,
   submissionCount,
@@ -43,6 +45,10 @@ export function SubmitPanel({
         </p>
       </div>
       <div className="submit-actions">
+        <button type="button" className="secondary-action guide-action" onClick={onShowGuide}>
+          <HelpCircle size={18} aria-hidden="true" />
+          입력 설명서
+        </button>
         <button
           type="button"
           className="secondary-action"

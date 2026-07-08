@@ -1,5 +1,4 @@
 import type { CellValue } from "../data/puzzle";
-import { downloadJson } from "./downloadJson";
 import type { ScoreResult } from "./scoring";
 
 export interface SubmissionPayload {
@@ -13,7 +12,7 @@ export interface SubmissionPayload {
   userAgent: string;
 }
 
-export type SubmissionDelivery = "endpoint" | "download";
+export type SubmissionDelivery = "endpoint" | "local";
 
 export interface SubmissionResult {
   delivery: SubmissionDelivery;
@@ -53,9 +52,7 @@ export async function submitPayload(payload: SubmissionPayload): Promise<Submiss
   console.log("Submission payload", payload);
 
   if (!endpoint) {
-    const timestamp = payload.submittedAt.replace(/:/g, "-");
-    downloadJson(payload, `submission-${payload.teamName}-${timestamp}.json`);
-    return { delivery: "download" };
+    return { delivery: "local" };
   }
 
   const response = await fetch(endpoint, {

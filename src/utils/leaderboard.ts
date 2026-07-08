@@ -34,7 +34,7 @@ function pickBestRecord(records: SubmissionRecord[]): SubmissionRecord | null {
 
 export function getLocalLeaderboardEntries(): LeaderboardEntry[] {
   return teams
-    .map((teamName) => {
+    .map<LeaderboardEntry | null>((teamName) => {
       const records = loadSubmissionHistory(puzzle.puzzleId, teamName);
       const bestRecord = pickBestRecord(records);
       if (!bestRecord) return null;

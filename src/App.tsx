@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ClueList } from "./components/ClueList";
 import { Header } from "./components/Header";
+import { InputGuideModal } from "./components/InputGuideModal";
 import { InputPad } from "./components/InputPad";
 import { LeaderboardPage } from "./components/LeaderboardPage";
 import { ProgressBar } from "./components/ProgressBar";
@@ -50,6 +51,7 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
   const [teamName, setTeamName] = useState("");
   const [modal, setModal] = useState<ModalState | null>(null);
   const [lastScore, setLastScore] = useState<ScoreResult | null>(null);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionHistory, setSubmissionHistory] = useState<SubmissionRecord[]>([]);
   const [reviewRecordId, setReviewRecordId] = useState<string | null>(null);
@@ -179,7 +181,7 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
         message:
           result.delivery === "endpoint"
             ? `${round}회차 답안이 제출 저장소에 기록되었습니다.`
-            : `${round}회차 제출 JSON 파일을 다운로드했습니다.`
+            : `${round}회차 답안이 이 브라우저의 제출 기록에 저장되었습니다.`
       });
     } catch (error) {
       setModal({
@@ -235,6 +237,7 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
               maxSubmissions={MAX_SUBMISSION_ROUNDS}
               onExitReview={() => setReviewRecordId(null)}
               onReset={handleReset}
+              onShowGuide={() => setIsGuideOpen(true)}
               onSubmit={handleSubmitRequest}
               reviewMode={reviewMode}
               submissionCount={submissionHistory.length}
@@ -264,6 +267,7 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
         score={lastScore}
         showScore={modal?.kind === "success"}
       />
+      <InputGuideModal open={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
     </div>
   );
 }

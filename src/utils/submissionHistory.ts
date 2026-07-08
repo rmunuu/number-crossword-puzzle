@@ -50,7 +50,7 @@ function cleanRecord(value: unknown): SubmissionRecord | null {
     submittedAt: record.submittedAt,
     answers: cleanAnswers(record.answers),
     score: record.score,
-    delivery: record.delivery === "endpoint" ? "endpoint" : "download"
+    delivery: record.delivery === "endpoint" ? "endpoint" : "local"
   };
 }
 

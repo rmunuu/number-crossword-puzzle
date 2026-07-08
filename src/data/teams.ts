@@ -1,8 +1,30 @@
-export const TEAM_LETTERS = ["A", "B", "C", "D", "E", "F"] as const;
-export const TEAM_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
-
-export const teams = TEAM_LETTERS.flatMap((letter) =>
-  TEAM_NUMBERS.map((number) => `${letter}-${number}`)
-);
+export const teams = [
+  "수통 1팀",
+  "수통 2팀",
+  "수통 3팀",
+  "수통 4팀",
+  "수통 5팀",
+  "수통 6팀",
+  "물리 1/2팀",
+  "물리 3/4팀",
+  "물리 5/6팀",
+  "물리 7/8팀",
+  "천문 1/2팀",
+  "천문 3/4팀",
+  "화학 1/2팀",
+  "화학 3/4팀",
+  "화학 5/6팀",
+  "화학 8/7팀",
+  "화학 9/10팀",
+  "생명 1/2팀",
+  "생명 3/4팀",
+  "생명 5/6팀",
+  "생명 7/8팀",
+  "지구 1팀",
+  "지구 2팀",
+  "지구 3팀",
+  "지구 4팀",
+  "지구 5팀"
+] as const;
 
 export type TeamName = (typeof teams)[number];

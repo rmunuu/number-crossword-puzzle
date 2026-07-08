@@ -31,7 +31,14 @@ VITE_BASE_PATH=
 
 ## 팀명
 
-팀은 드롭다운에서만 선택합니다. 형식은 `A-1`부터 `F-9`까지 총 54개입니다.
+팀은 드롭다운에서만 선택합니다.
+
+- 수통 1팀, 2팀, 3팀, 4팀, 5팀, 6팀
+- 물리 1/2팀, 3/4팀, 5/6팀, 7/8팀
+- 천문 1/2팀, 3/4팀
+- 화학 1/2팀, 3/4팀, 5/6팀, 8/7팀, 9/10팀
+- 생명 1/2팀, 3/4팀, 5/6팀, 7/8팀
+- 지구 1팀, 2팀, 3팀, 4팀, 5팀
 
 ## 입력 키
 
@@ -69,7 +76,7 @@ export const solution: Record<number, CellValue> = {
 
 팀별로 최대 5번 제출할 수 있습니다. 각 제출은 즉시 채점되고, 제출 기록은 브라우저 localStorage에 저장되어 다시 확인할 수 있습니다. 기록을 선택하면 제출 당시 답안만 보이고, 맞은 칸은 연한 파랑, 틀린 칸은 연한 빨강으로 표시됩니다. 선택한 기록은 현재 입력 화면으로 복사해 수정한 뒤 다음 회차로 다시 제출할 수 있습니다.
 
-`VITE_SUBMISSION_ENDPOINT`가 있으면 Google Apps Script Web App으로 POST합니다. 없으면 제출 payload를 JSON 파일로 다운로드합니다. payload는 콘솔에도 출력됩니다.
+`VITE_SUBMISSION_ENDPOINT`가 있으면 Google Apps Script Web App으로 POST합니다. 없으면 제출 기록은 현재 브라우저 localStorage에만 저장됩니다. payload는 콘솔에도 출력됩니다.
 
 Google Sheets용 Apps Script 예시는 `docs/google-apps-script.js`에 있습니다.
 

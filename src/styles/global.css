@@ -392,6 +392,11 @@ h1 {
   gap: 8px;
 }
 
+.guide-action,
+.single-action {
+  grid-column: 1 / -1;
+}
+
 .primary-action,
 .secondary-action,
 .danger-action {
@@ -554,6 +559,19 @@ h1 {
 .modal p {
   color: var(--muted);
   line-height: 1.55;
+}
+
+.guide-modal {
+  width: min(460px, 100%);
+}
+
+.guide-list {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding-left: 20px;
+  color: #334155;
+  line-height: 1.45;
 }
 
 .modal-icon {
