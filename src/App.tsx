@@ -121,6 +121,15 @@ export default function App() {
     setReviewRecordId(null);
   }, [resetAnswers, teamName]);
 
+  const handleLoadSelectedRecordForEdit = useCallback(() => {
+    if (!teamName || !selectedReviewRecord || !hasSubmissionSlot) return;
+
+    resetAnswers(selectedReviewRecord.answers);
+    setReviewRecordId(null);
+    setLastScore(null);
+    setModal(null);
+  }, [hasSubmissionSlot, resetAnswers, selectedReviewRecord, teamName]);
+
   const submitCurrentAnswers = useCallback(async () => {
     if (!teamName) return;
     if (submissionHistory.length >= MAX_SUBMISSION_ROUNDS) {
@@ -228,7 +237,9 @@ export default function App() {
               totalCells={puzzle.totalCells}
             />
             <SubmissionHistory
+              canLoadRecord={hasSubmissionSlot}
               maxSubmissions={MAX_SUBMISSION_ROUNDS}
+              onLoadSelectedRecord={handleLoadSelectedRecordForEdit}
               records={submissionHistory}
               selectedRecordId={reviewRecordId}
               onSelectRecord={setReviewRecordId}

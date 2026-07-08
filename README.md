@@ -1,6 +1,6 @@
-# 수식십자말풀이 답안 제출
+# 수식퍼즐
 
-팀별로 수식십자말풀이 답안을 웹에서 입력하고 제출하는 React + TypeScript + Vite 앱입니다.
+팀별로 수식퍼즐 답안을 웹에서 입력하고 제출하는 React + TypeScript + Vite 앱입니다.
 
 ## 로컬 실행
 
@@ -67,7 +67,7 @@ export const solution: Record<number, CellValue> = {
 
 ## 제출 저장
 
-팀별로 최대 5번 제출할 수 있습니다. 각 제출은 즉시 채점되고, 제출 기록은 브라우저 localStorage에 저장되어 다시 확인할 수 있습니다. 기록을 선택하면 제출 당시 답안만 보이고, 맞은 칸은 연한 파랑, 틀린 칸은 연한 빨강으로 표시됩니다.
+팀별로 최대 5번 제출할 수 있습니다. 각 제출은 즉시 채점되고, 제출 기록은 브라우저 localStorage에 저장되어 다시 확인할 수 있습니다. 기록을 선택하면 제출 당시 답안만 보이고, 맞은 칸은 연한 파랑, 틀린 칸은 연한 빨강으로 표시됩니다. 선택한 기록은 현재 입력 화면으로 복사해 수정한 뒤 다음 회차로 다시 제출할 수 있습니다.
 
 `VITE_SUBMISSION_ENDPOINT`가 있으면 Google Apps Script Web App으로 POST합니다. 없으면 제출 payload를 JSON 파일로 다운로드합니다. payload는 콘솔에도 출력됩니다.
 
@@ -85,10 +85,12 @@ timestamp, puzzleId, teamName, round, maxRounds, filledCells, correctCells, inco
 
 1. GitHub 저장소 Settings → Pages에서 Source를 GitHub Actions로 설정합니다.
 2. Google Apps Script 제출 저장을 쓰려면 Settings → Secrets and variables → Actions → Variables에 `VITE_SUBMISSION_ENDPOINT`를 추가합니다.
-3. `main` 브랜치에 push합니다.
+3. `master` 또는 `main` 브랜치에 push합니다.
 4. Actions가 `pnpm run build` 후 Pages에 배포합니다.
 
 저장소 경로가 자동으로 base path에 반영됩니다. 별도 경로가 필요하면 `VITE_BASE_PATH=/저장소명/` 형태로 지정합니다.
+
+현재 GitHub 저장소 기준 접속 주소는 `https://rmunuu.github.io/number-crossword-puzzle/`입니다.
 
 ## 현재 TODO
 

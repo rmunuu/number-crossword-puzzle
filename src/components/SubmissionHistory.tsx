@@ -2,9 +2,11 @@ import { History } from "lucide-react";
 import type { SubmissionRecord } from "../utils/submissionHistory";
 
 interface SubmissionHistoryProps {
+  canLoadRecord: boolean;
   maxSubmissions: number;
   records: SubmissionRecord[];
   selectedRecordId: string | null;
+  onLoadSelectedRecord: () => void;
   onSelectRecord: (recordId: string) => void;
 }
 
@@ -18,8 +20,10 @@ function formatSubmittedAt(value: string): string {
 }
 
 export function SubmissionHistory({
+  canLoadRecord,
   maxSubmissions,
   records,
+  onLoadSelectedRecord,
   selectedRecordId,
   onSelectRecord
 }: SubmissionHistoryProps) {
@@ -53,6 +57,14 @@ export function SubmissionHistory({
           ))}
         </div>
       )}
+      <button
+        type="button"
+        className="history-edit-action"
+        disabled={!selectedRecordId || !canLoadRecord}
+        onClick={onLoadSelectedRecord}
+      >
+        선택 기록 수정
+      </button>
     </section>
   );
 }

@@ -55,7 +55,7 @@ export interface PuzzleDefinition {
 
 export const puzzle: PuzzleDefinition = {
   puzzleId: "formula-crossword-30q-2026-07-08",
-  title: "수식십자말풀이",
+  title: "수식퍼즐",
   declaredTotalCells: 142,
   totalCells: 143,
   rowCount: 18,
