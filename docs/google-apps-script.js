@@ -169,6 +169,7 @@ function getAccessSession(token) {
 
 function verifyAccess(teamName, pin) {
   const submittedPin = String(pin || "").trim();
+  const submittedTeamName = String(teamName || "").trim();
   if (!submittedPin) {
     throw new Error("PIN is required.");
   }
@@ -182,23 +183,24 @@ function verifyAccess(teamName, pin) {
     };
   }
 
-  if (!teamName) {
+  if (!submittedTeamName) {
     throw new Error("Team is required.");
   }
 
   const teamCodes = getTeamCodes();
-  if (!Object.prototype.hasOwnProperty.call(teamCodes, teamName)) {
+  const matchedTeamName = Object.keys(teamCodes).find((storedTeamName) => storedTeamName.trim() === submittedTeamName);
+  if (!matchedTeamName) {
     throw new Error("Unknown team.");
   }
 
-  if (String(teamCodes[teamName]).trim() !== submittedPin) {
+  if (String(teamCodes[matchedTeamName]).trim() !== submittedPin) {
     throw new Error("Invalid PIN.");
   }
 
   return {
     role: "team",
-    teamName,
-    token: createAccessToken("team", teamName)
+    teamName: matchedTeamName,
+    token: createAccessToken("team", matchedTeamName)
   };
 }
 
@@ -259,13 +261,13 @@ function getLeaderboardEntries(puzzleId) {
     if (!teamMap[teamName]) {
       teamMap[teamName] = {
         teamName,
-        submissions: 0,
+        submissionRounds: {},
         best: null,
         maxRounds
       };
     }
 
-    teamMap[teamName].submissions += 1;
+    teamMap[teamName].submissionRounds[String(round || 0)] = true;
     teamMap[teamName].maxRounds = maxRounds || teamMap[teamName].maxRounds;
 
     const candidate = {
@@ -294,9 +296,10 @@ function getLeaderboardEntries(puzzleId) {
     .map((teamName) => {
       const record = teamMap[teamName];
       const best = record.best;
-      best.submissionCount = record.submissions;
+      const submissionCount = Object.keys(record.submissionRounds).length;
+      best.submissionCount = submissionCount;
       best.maxRounds = record.maxRounds;
-      best.remainingRounds = Math.max(0, record.maxRounds - record.submissions);
+      best.remainingRounds = Math.max(0, record.maxRounds - submissionCount);
       return best;
     })
     .sort((a, b) => {

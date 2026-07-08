@@ -66,13 +66,21 @@ export function clearAuthSession(): void {
 
 async function readVerifyResponse(response: Response): Promise<VerifyAccessResponse> {
   const responseText = await response.text();
-  if (!responseText) return {};
+  if (!responseText) {
+    return {
+      ok: false,
+      error: "인증 응답이 비어 있습니다. Apps Script 웹앱을 최신 코드로 새 버전 배포했는지 확인해 주세요."
+    };
+  }
 
   try {
     const parsed = JSON.parse(responseText) as unknown;
     return parsed && typeof parsed === "object" ? (parsed as VerifyAccessResponse) : {};
   } catch {
-    return {};
+    return {
+      ok: false,
+      error: "인증 응답이 JSON이 아닙니다. Apps Script 웹앱 URL과 배포 권한을 확인해 주세요."
+    };
   }
 }
 
@@ -104,7 +112,7 @@ export async function verifyAccess(teamName: string, pin: string): Promise<AuthS
     throw new Error(payload.error ?? "PIN을 확인하지 못했습니다.");
   }
   if ((payload.role !== "team" && payload.role !== "admin") || typeof payload.token !== "string") {
-    throw new Error("인증 응답이 올바르지 않습니다.");
+    throw new Error("인증 응답이 올바르지 않습니다. Apps Script 코드를 최신 버전으로 다시 배포해 주세요.");
   }
 
   const session: AuthSession = {
