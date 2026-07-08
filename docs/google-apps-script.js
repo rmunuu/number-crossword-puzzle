@@ -113,6 +113,16 @@ function getMasterCode() {
   return properties.getProperty("MASTER_CODE") || properties.getProperty("ADMIN_CODE") || "";
 }
 
+function getAdminCodes() {
+  const properties = PropertiesService.getScriptProperties();
+  return [
+    properties.getProperty("MASTER_CODE"),
+    properties.getProperty("ADMIN_CODE")
+  ]
+    .filter((code) => code)
+    .map((code) => String(code).trim());
+}
+
 function getTeamCodes() {
   const rawValue = PropertiesService.getScriptProperties().getProperty(TEAM_CODES_PROPERTY);
   if (!rawValue) {
@@ -298,11 +308,11 @@ function getLeaderboardEntries(puzzleId) {
 }
 
 function resetLeaderboard(puzzleId, adminCode) {
-  const configuredCode = getMasterCode();
-  if (!configuredCode) {
+  const configuredCodes = getAdminCodes();
+  if (configuredCodes.length === 0) {
     throw new Error("MASTER_CODE or ADMIN_CODE is not configured in Script Properties.");
   }
-  if (adminCode !== configuredCode) {
+  if (!configuredCodes.includes(String(adminCode || "").trim())) {
     throw new Error("Invalid admin code.");
   }
 
