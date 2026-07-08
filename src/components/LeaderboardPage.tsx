@@ -45,10 +45,7 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
   }, [refreshLeaderboard]);
 
   const handleReset = useCallback(async () => {
-    const promptMessage =
-      source === "endpoint"
-        ? "관리자 코드를 입력하면 전체 리더보드를 초기화합니다."
-        : "제출 endpoint가 없어 이 브라우저의 리더보드 기록만 초기화합니다. 계속하려면 관리자 코드를 입력하세요.";
+    const promptMessage = "관리자 코드를 입력하면 전체 게임을 초기화합니다.";
     const adminCode = window.prompt(promptMessage);
     if (!adminCode) return;
 
@@ -95,7 +92,7 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
           <button
             type="button"
             className="danger-action compact-action"
-            disabled={isResetting}
+            disabled={isLoading || isResetting}
             onClick={handleReset}
           >
             <ShieldAlert size={18} aria-hidden="true" />

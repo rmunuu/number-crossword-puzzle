@@ -4,3 +4,4 @@ tsconfig.tsbuildinfo
 .env
 .DS_Store
 *.local
+team-pins.private.json
