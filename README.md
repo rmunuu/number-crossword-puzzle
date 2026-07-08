@@ -80,6 +80,12 @@ export const solution: Record<number, CellValue> = {
 
 Google Sheets용 Apps Script 예시는 `docs/google-apps-script.js`에 있습니다.
 
+Apps Script의 Script Properties에는 아래 값을 넣습니다.
+
+- `SPREADSHEET_ID`: Google Sheet URL의 `/d/`와 `/edit` 사이 ID
+- `SHEET_NAME`: 제출 기록을 저장할 시트 이름, 생략하면 `Submissions`
+- `ADMIN_CODE`: 리더보드 초기화 관리자 코드
+
 Sheet 컬럼 예시:
 
 ```text
@@ -92,7 +98,7 @@ timestamp, puzzleId, teamName, round, maxRounds, filledCells, correctCells, inco
 
 `VITE_SUBMISSION_ENDPOINT`가 설정되어 있으면 Google Sheet 전체 제출 기록을 기준으로 보여줍니다. endpoint가 없으면 현재 브라우저의 localStorage 기록만 표시합니다.
 
-관리자 초기화를 쓰려면 Apps Script의 Script Properties에 `ADMIN_CODE`를 추가하세요. 리더보드 화면에서 `초기화` 버튼을 누르고 이 코드를 입력하면 해당 퍼즐의 리더보드 제출 기록이 삭제됩니다.
+관리자 초기화를 쓰려면 리더보드 화면에서 `초기화` 버튼을 누르고 Script Properties에 넣은 `ADMIN_CODE`를 입력하면 됩니다.
 
 ## GitHub Pages 배포
 
@@ -100,7 +106,7 @@ timestamp, puzzleId, teamName, round, maxRounds, filledCells, correctCells, inco
 
 1. GitHub 저장소 Settings → Pages에서 Source를 GitHub Actions로 설정합니다.
 2. Google Apps Script 제출 저장을 쓰려면 Settings → Secrets and variables → Actions → Variables에 `VITE_SUBMISSION_ENDPOINT`를 추가합니다.
-3. `master` 또는 `main` 브랜치에 push합니다.
+3. 변수 추가나 수정 후 `master` 또는 `main` 브랜치에 push하거나 Actions를 다시 실행합니다.
 4. Actions가 `pnpm run build` 후 Pages에 배포합니다.
 
 저장소 경로가 자동으로 base path에 반영됩니다. 별도 경로가 필요하면 `VITE_BASE_PATH=/저장소명/` 형태로 지정합니다.

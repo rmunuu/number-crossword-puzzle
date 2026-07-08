@@ -13,6 +13,8 @@ const HEADER = [
   "userAgent"
 ];
 
+const DEFAULT_SHEET_NAME = "Submissions";
+
 function doGet(e) {
   try {
     const action = e.parameter.action || "leaderboard";
@@ -46,8 +48,23 @@ function doPost(e) {
   }
 }
 
+function getSubmissionSheet() {
+  const properties = PropertiesService.getScriptProperties();
+  const spreadsheetId = properties.getProperty("SPREADSHEET_ID");
+  const sheetName = properties.getProperty("SHEET_NAME") || DEFAULT_SHEET_NAME;
+  const spreadsheet = spreadsheetId
+    ? SpreadsheetApp.openById(spreadsheetId)
+    : SpreadsheetApp.getActiveSpreadsheet();
+
+  if (!spreadsheet) {
+    throw new Error("SPREADSHEET_ID is not configured in Script Properties.");
+  }
+
+  return spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
+}
+
 function appendSubmission(payload) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const sheet = getSubmissionSheet();
   ensureHeader(sheet);
 
   sheet.appendRow([
@@ -67,7 +84,7 @@ function appendSubmission(payload) {
 }
 
 function getLeaderboardEntries(puzzleId) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const sheet = getSubmissionSheet();
   ensureHeader(sheet);
 
   const rows = getDataRows(sheet);
@@ -143,7 +160,7 @@ function resetLeaderboard(puzzleId, adminCode) {
     throw new Error("Invalid admin code.");
   }
 
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const sheet = getSubmissionSheet();
   ensureHeader(sheet);
 
   const rows = getDataRows(sheet);
