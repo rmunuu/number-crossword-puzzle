@@ -18,6 +18,11 @@ export interface SubmissionResult {
   delivery: SubmissionDelivery;
 }
 
+interface EndpointResponsePayload {
+  ok?: boolean;
+  error?: string;
+}
+
 interface CreateSubmissionPayloadArgs {
   puzzleId: string;
   teamName: string;
@@ -47,6 +52,28 @@ export function createSubmissionPayload({
   };
 }
 
+async function readEndpointResponse(response: Response): Promise<EndpointResponsePayload | null> {
+  const responseText = await response.text();
+  if (!responseText) return null;
+
+  try {
+    const parsed = JSON.parse(responseText) as unknown;
+    if (!parsed || typeof parsed !== "object") return null;
+    const payload = parsed as EndpointResponsePayload;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function getSubmitStatusError(status: number): string {
+  if (status === 404) {
+    return "제출 endpoint를 찾지 못했습니다. Apps Script 웹앱 URL이 /exec로 끝나는지, 새 버전으로 배포했는지 확인해 주세요.";
+  }
+
+  return `Submit failed: ${status}`;
+}
+
 export async function submitPayload(payload: SubmissionPayload): Promise<SubmissionResult> {
   const endpoint = import.meta.env.VITE_SUBMISSION_ENDPOINT?.trim();
   console.log("Submission payload", payload);
@@ -64,7 +91,12 @@ export async function submitPayload(payload: SubmissionPayload): Promise<Submiss
   });
 
   if (!response.ok) {
-    throw new Error(`Submit failed: ${response.status}`);
+    throw new Error(getSubmitStatusError(response.status));
+  }
+
+  const responsePayload = await readEndpointResponse(response);
+  if (responsePayload?.ok === false) {
+    throw new Error(responsePayload.error || "답안을 제출하지 못했습니다.");
   }
 
   return { delivery: "endpoint" };
