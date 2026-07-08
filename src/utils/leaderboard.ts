@@ -17,6 +17,9 @@ export interface LeaderboardResult {
   source: "endpoint" | "local";
 }
 
+const TIMESTAMP_MODE_ISO_TEXT = "iso-text-v2";
+const LEGACY_ENDPOINT_TIME_SHIFT_MS = 7 * 60 * 60 * 1000;
+
 function compareLeaderboardEntries(a: LeaderboardEntry, b: LeaderboardEntry): number {
   return b.correctCells - a.correctCells || new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
 }
@@ -53,7 +56,18 @@ export function getLocalLeaderboardEntries(): LeaderboardEntry[] {
     .sort(compareLeaderboardEntries);
 }
 
+function normalizeEndpointSubmittedAt(value: string, timestampMode: unknown): string {
+  if (timestampMode === TIMESTAMP_MODE_ISO_TEXT) return value;
+
+  const timestamp = new Date(value).getTime();
+  if (Number.isNaN(timestamp)) return value;
+
+  return new Date(timestamp + LEGACY_ENDPOINT_TIME_SHIFT_MS).toISOString();
+}
+
 function normalizeEndpointEntries(value: unknown): LeaderboardEntry[] {
+  const timestampMode =
+    value && typeof value === "object" ? (value as { timestampMode?: unknown }).timestampMode : undefined;
   const entries = Array.isArray(value)
     ? value
     : value && typeof value === "object" && Array.isArray((value as { entries?: unknown }).entries)
@@ -79,7 +93,7 @@ function normalizeEndpointEntries(value: unknown): LeaderboardEntry[] {
         correctCells: candidate.correctCells,
         totalCells: candidate.totalCells,
         remainingRounds: candidate.remainingRounds,
-        submittedAt: candidate.submittedAt,
+        submittedAt: normalizeEndpointSubmittedAt(candidate.submittedAt, timestampMode),
         submissionCount: typeof candidate.submissionCount === "number" ? candidate.submissionCount : 0,
         round: typeof candidate.round === "number" ? candidate.round : 0
       };

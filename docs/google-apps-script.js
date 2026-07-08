@@ -14,6 +14,7 @@ const HEADER = [
 ];
 
 const DEFAULT_SHEET_NAME = "Submissions";
+const TIMESTAMP_MODE = "iso-text-v2";
 
 function doGet(e) {
   try {
@@ -22,6 +23,7 @@ function doGet(e) {
     if (action === "leaderboard") {
       return jsonResponse({
         ok: true,
+        timestampMode: TIMESTAMP_MODE,
         entries: getLeaderboardEntries(e.parameter.puzzleId)
       });
     }
@@ -49,9 +51,16 @@ function doPost(e) {
 }
 
 function getSubmissionSheet() {
+  const spreadsheet = getSubmissionSpreadsheet();
+  const properties = PropertiesService.getScriptProperties();
+  const sheetName = properties.getProperty("SHEET_NAME") || DEFAULT_SHEET_NAME;
+
+  return spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
+}
+
+function getSubmissionSpreadsheet() {
   const properties = PropertiesService.getScriptProperties();
   const spreadsheetId = properties.getProperty("SPREADSHEET_ID");
-  const sheetName = properties.getProperty("SHEET_NAME") || DEFAULT_SHEET_NAME;
   const spreadsheet = spreadsheetId
     ? SpreadsheetApp.openById(spreadsheetId)
     : SpreadsheetApp.getActiveSpreadsheet();
@@ -60,15 +69,16 @@ function getSubmissionSheet() {
     throw new Error("SPREADSHEET_ID is not configured in Script Properties.");
   }
 
-  return spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
+  return spreadsheet;
 }
 
 function appendSubmission(payload) {
   const sheet = getSubmissionSheet();
   ensureHeader(sheet);
+  const submittedAt = payload.submittedAt || new Date().toISOString();
 
   sheet.appendRow([
-    new Date(payload.submittedAt || new Date()),
+    submittedAt,
     payload.puzzleId,
     payload.teamName,
     payload.round,
@@ -177,14 +187,15 @@ function resetLeaderboard(puzzleId, adminCode) {
 function ensureHeader(sheet) {
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, HEADER.length).setValues([HEADER]);
-    return;
+  } else {
+    const firstRow = sheet.getRange(1, 1, 1, HEADER.length).getValues()[0];
+    if (firstRow[0] !== HEADER[0]) {
+      sheet.insertRowBefore(1);
+      sheet.getRange(1, 1, 1, HEADER.length).setValues([HEADER]);
+    }
   }
 
-  const firstRow = sheet.getRange(1, 1, 1, HEADER.length).getValues()[0];
-  if (firstRow[0] !== HEADER[0]) {
-    sheet.insertRowBefore(1);
-    sheet.getRange(1, 1, 1, HEADER.length).setValues([HEADER]);
-  }
+  sheet.getRange(1, 1, sheet.getMaxRows(), 1).setNumberFormat("@");
 }
 
 function getDataRows(sheet) {
@@ -194,8 +205,19 @@ function getDataRows(sheet) {
 }
 
 function toIsoString(value) {
-  if (value instanceof Date) return value.toISOString();
+  if (value instanceof Date) return toIsoStringFromLegacySheetDate(value);
   return new Date(value).toISOString();
+}
+
+function toIsoStringFromLegacySheetDate(value) {
+  const timeZone = getSubmissionSpreadsheet().getSpreadsheetTimeZone();
+  const offset = Utilities.formatDate(value, timeZone, "Z");
+  const sign = offset[0] === "-" ? -1 : 1;
+  const hours = Number(offset.slice(1, 3));
+  const minutes = Number(offset.slice(3, 5));
+  const offsetMinutes = sign * (hours * 60 + minutes);
+
+  return new Date(value.getTime() - offsetMinutes * 60 * 1000).toISOString();
 }
 
 function jsonResponse(payload) {
