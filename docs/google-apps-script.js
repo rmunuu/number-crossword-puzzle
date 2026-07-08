@@ -16,6 +16,8 @@ const HEADER = [
 const DEFAULT_SHEET_NAME = "Submissions";
 const TIMESTAMP_MODE = "iso-text-v2";
 const RESET_AT_PROPERTY_PREFIX = "RESET_AT:";
+const SESSION_PROPERTY_PREFIX = "SESSION:";
+const TEAM_CODES_PROPERTY = "TEAM_CODES_JSON";
 
 function doGet(e) {
   try {
@@ -46,6 +48,13 @@ function doGet(e) {
 function doPost(e) {
   try {
     const payload = JSON.parse(e.postData.contents);
+
+    if (payload.action === "verifyAccess") {
+      return jsonResponse({
+        ok: true,
+        ...verifyAccess(payload.teamName, payload.pin)
+      });
+    }
 
     if (payload.action === "resetLeaderboard") {
       const resetAt = resetLeaderboard(payload.puzzleId, payload.adminCode);
@@ -99,7 +108,105 @@ function saveGameResetAt(puzzleId) {
   return resetAt;
 }
 
+function getMasterCode() {
+  const properties = PropertiesService.getScriptProperties();
+  return properties.getProperty("MASTER_CODE") || properties.getProperty("ADMIN_CODE") || "";
+}
+
+function getTeamCodes() {
+  const rawValue = PropertiesService.getScriptProperties().getProperty(TEAM_CODES_PROPERTY);
+  if (!rawValue) {
+    throw new Error("TEAM_CODES_JSON is not configured in Script Properties.");
+  }
+
+  const parsed = JSON.parse(rawValue);
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("TEAM_CODES_JSON is invalid.");
+  }
+
+  return parsed;
+}
+
+function createAccessToken(role, teamName) {
+  const token = Utilities.getUuid() + Utilities.getUuid().replace(/-/g, "");
+  PropertiesService
+    .getScriptProperties()
+    .setProperty(
+      SESSION_PROPERTY_PREFIX + token,
+      JSON.stringify({
+        createdAt: new Date().toISOString(),
+        role,
+        teamName: teamName || ""
+      })
+    );
+  return token;
+}
+
+function getAccessSession(token) {
+  if (!token) return null;
+
+  const rawValue = PropertiesService
+    .getScriptProperties()
+    .getProperty(SESSION_PROPERTY_PREFIX + token);
+  if (!rawValue) return null;
+
+  try {
+    return JSON.parse(rawValue);
+  } catch (error) {
+    return null;
+  }
+}
+
+function verifyAccess(teamName, pin) {
+  const submittedPin = String(pin || "").trim();
+  if (!submittedPin) {
+    throw new Error("PIN is required.");
+  }
+
+  const masterCode = getMasterCode();
+  if (masterCode && submittedPin === masterCode) {
+    return {
+      role: "admin",
+      teamName: "",
+      token: createAccessToken("admin", "")
+    };
+  }
+
+  if (!teamName) {
+    throw new Error("Team is required.");
+  }
+
+  const teamCodes = getTeamCodes();
+  if (!Object.prototype.hasOwnProperty.call(teamCodes, teamName)) {
+    throw new Error("Unknown team.");
+  }
+
+  if (String(teamCodes[teamName]).trim() !== submittedPin) {
+    throw new Error("Invalid PIN.");
+  }
+
+  return {
+    role: "team",
+    teamName,
+    token: createAccessToken("team", teamName)
+  };
+}
+
+function requireSubmissionAccess(payload) {
+  const session = getAccessSession(payload.authToken);
+  if (!session) {
+    throw new Error("Login is required before submitting.");
+  }
+
+  if (session.role === "admin") return;
+  if (session.role === "team" && session.teamName === payload.teamName) return;
+
+  throw new Error("This session cannot submit for the selected team.");
+}
+
 function appendSubmission(payload) {
+  requireSubmissionAccess(payload);
+
   const sheet = getSubmissionSheet();
   ensureHeader(sheet);
   const submittedAt = payload.submittedAt || new Date().toISOString();
@@ -191,9 +298,9 @@ function getLeaderboardEntries(puzzleId) {
 }
 
 function resetLeaderboard(puzzleId, adminCode) {
-  const configuredCode = PropertiesService.getScriptProperties().getProperty("ADMIN_CODE");
+  const configuredCode = getMasterCode();
   if (!configuredCode) {
-    throw new Error("ADMIN_CODE is not configured in Script Properties.");
+    throw new Error("MASTER_CODE or ADMIN_CODE is not configured in Script Properties.");
   }
   if (adminCode !== configuredCode) {
     throw new Error("Invalid admin code.");

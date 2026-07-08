@@ -84,7 +84,11 @@ Apps Script의 Script Properties에는 아래 값을 넣습니다.
 
 - `SPREADSHEET_ID`: Google Sheet URL의 `/d/`와 `/edit` 사이 ID
 - `SHEET_NAME`: 제출 기록을 저장할 시트 이름, 생략하면 `Submissions`
-- `ADMIN_CODE`: 리더보드 초기화 관리자 코드
+- `TEAM_CODES_JSON`: 팀별 PIN JSON
+- `MASTER_CODE`: 관리자 로그인 및 전체 초기화 코드
+- `ADMIN_CODE`: 기존 초기화 코드, `MASTER_CODE`가 있으면 생략 가능
+
+팀별 PIN 원본은 로컬의 `team-pins.private.json.local`에 둡니다. 이 파일은 GitHub에 올리지 않습니다.
 
 Sheet 컬럼 예시:
 
@@ -98,7 +102,19 @@ timestamp, puzzleId, teamName, round, maxRounds, filledCells, correctCells, inco
 
 `VITE_SUBMISSION_ENDPOINT`가 설정되어 있으면 Google Sheet 전체 제출 기록을 기준으로 보여줍니다. endpoint가 없으면 현재 브라우저의 localStorage 기록만 표시합니다.
 
-관리자 초기화는 전체 게임 초기화입니다. 리더보드 화면에서 `초기화` 버튼을 누르고 Script Properties에 넣은 `ADMIN_CODE`를 입력하면 Google Sheet 제출 기록이 삭제되고, 각 브라우저는 reset 상태를 감지해 모든 팀의 입력 답안과 제출 기록을 지웁니다. 제출 화면과 리더보드 화면은 10초마다 reset 상태를 확인합니다.
+관리자 초기화는 전체 게임 초기화입니다. 리더보드 화면에서 `초기화` 버튼을 누르고 Script Properties에 넣은 `MASTER_CODE`를 입력하면 Google Sheet 제출 기록이 삭제되고, 각 브라우저는 reset 상태를 감지해 모든 팀의 입력 답안과 제출 기록을 지웁니다. 제출 화면과 리더보드 화면은 10초마다 reset 상태를 확인합니다.
+
+## 팀 PIN 인증
+
+시작 화면에서 팀과 PIN을 입력하면 해당 팀 제출 화면으로 들어갑니다. 학생 세션에서는 팀 선택을 바꿀 수 없고 자기 팀 제출 기록만 볼 수 있습니다. `MASTER_CODE`를 입력하면 관리자 세션으로 들어가며 기존처럼 모든 팀 입력 페이지를 선택할 수 있습니다.
+
+Apps Script 설정 위치:
+
+1. Apps Script 편집기 왼쪽 톱니바퀴 `프로젝트 설정`으로 이동합니다.
+2. `스크립트 속성`에서 `스크립트 속성 추가`를 누릅니다.
+3. `TEAM_CODES_JSON` 이름으로 `team-pins.private.json.local`의 `TEAM_CODES_JSON` 객체를 붙여 넣습니다.
+4. `MASTER_CODE` 이름으로 같은 파일의 `MASTER_CODE` 값을 넣습니다.
+5. `배포` → `배포 관리` → 웹앱 배포의 연필 버튼 → `버전`에서 `새 버전` → `배포`를 누릅니다.
 
 ## GitHub Pages 배포
 

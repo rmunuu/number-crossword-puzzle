@@ -4,6 +4,7 @@ import { Header } from "./components/Header";
 import { InputGuideModal } from "./components/InputGuideModal";
 import { InputPad } from "./components/InputPad";
 import { LeaderboardPage } from "./components/LeaderboardPage";
+import { LoginPage } from "./components/LoginPage";
 import { ProgressBar } from "./components/ProgressBar";
 import { PuzzleGrid } from "./components/PuzzleGrid";
 import { SubmissionHistory } from "./components/SubmissionHistory";
@@ -16,6 +17,7 @@ import { solution } from "./data/solution";
 import { clearProgress, loadProgress, saveProgress } from "./hooks/useLocalStorage";
 import { useKeyboardInput } from "./hooks/useKeyboardInput";
 import { usePuzzleInput } from "./hooks/usePuzzleInput";
+import { clearAuthSession, loadAuthSession, saveAuthSession, type AuthSession } from "./utils/auth";
 import { syncRemoteGameReset } from "./utils/gameReset";
 import { scoreAnswers, type ScoreResult } from "./utils/scoring";
 import { createSubmissionPayload, submitPayload } from "./utils/submission";
@@ -45,10 +47,23 @@ function getCellStatuses(answers: Record<number, CellValue>): Record<number, "co
 }
 
 interface SubmitAppProps {
+  onLogout: () => void;
   onOpenLeaderboard: () => void;
+  session: AuthSession;
 }
 
-function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
+function TeamLockPanel({ teamName }: { teamName: string }) {
+  return (
+    <section className="team-lock-panel" aria-label="인증된 팀">
+      <span>팀</span>
+      <strong>{teamName}</strong>
+      <small>PIN 인증됨</small>
+    </section>
+  );
+}
+
+function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
+  const isAdmin = session.role === "admin";
   const [teamName, setTeamName] = useState("");
   const [modal, setModal] = useState<ModalState | null>(null);
   const [lastScore, setLastScore] = useState<ScoreResult | null>(null);
@@ -123,6 +138,8 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
 
   const handleTeamChange = useCallback(
     (nextTeamName: string) => {
+      if (!isAdmin && nextTeamName !== session.teamName) return;
+
       setTeamName(nextTeamName);
       setLastScore(null);
       setModal(null);
@@ -140,8 +157,14 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
       setSubmissionHistory(savedHistory);
       setReviewRecordId(savedHistory[savedHistory.length - 1]?.id ?? null);
     },
-    [resetAnswers]
+    [isAdmin, resetAnswers, session.teamName]
   );
+
+  useEffect(() => {
+    if (session.role === "team") {
+      handleTeamChange(session.teamName);
+    }
+  }, [handleTeamChange, session.role, session.teamName]);
 
   const handleReset = useCallback(() => {
     if (!teamName) return;
@@ -186,6 +209,7 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
       round,
       maxRounds: MAX_SUBMISSION_ROUNDS,
       answers: completeAnswers,
+      authToken: session.token,
       score
     });
 
@@ -219,7 +243,7 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [answers, submissionHistory, teamName]);
+  }, [answers, session.token, submissionHistory, teamName]);
 
   const handleSubmitRequest = useCallback(() => {
     if (!teamName) return;
@@ -238,11 +262,20 @@ function SubmitApp({ onOpenLeaderboard }: SubmitAppProps) {
 
   return (
     <div className="app-shell">
-      <Header onOpenLeaderboard={onOpenLeaderboard} totalCells={puzzle.totalCells} />
+      <Header
+        authLabel={isAdmin ? "관리자" : session.teamName}
+        onLogout={onLogout}
+        onOpenLeaderboard={onOpenLeaderboard}
+        totalCells={puzzle.totalCells}
+      />
 
       <main className="app-main">
         <section className="control-band">
-          <TeamSelector value={teamName} onChange={handleTeamChange} />
+          {isAdmin ? (
+            <TeamSelector value={teamName} onChange={handleTeamChange} />
+          ) : (
+            <TeamLockPanel teamName={teamName || session.teamName} />
+          )}
           <ProgressBar filled={filledCount} total={puzzle.totalCells} />
         </section>
 
@@ -306,6 +339,7 @@ function getCurrentRoute(): "submit" | "leaderboard" {
 
 export default function App() {
   const [route, setRoute] = useState<"submit" | "leaderboard">(getCurrentRoute);
+  const [session, setSession] = useState<AuthSession | null>(() => loadAuthSession());
 
   useEffect(() => {
     function handleHashChange() {
@@ -326,9 +360,27 @@ export default function App() {
     setRoute("submit");
   }, []);
 
+  const handleAuthenticated = useCallback((nextSession: AuthSession) => {
+    saveAuthSession(nextSession);
+    setSession(nextSession);
+    window.location.hash = "";
+    setRoute("submit");
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    clearAuthSession();
+    setSession(null);
+    window.location.hash = "";
+    setRoute("submit");
+  }, []);
+
   if (route === "leaderboard") {
     return <LeaderboardPage onBack={openSubmit} />;
   }
 
-  return <SubmitApp onOpenLeaderboard={openLeaderboard} />;
+  if (!session) {
+    return <LoginPage onAuthenticated={handleAuthenticated} onOpenLeaderboard={openLeaderboard} />;
+  }
+
+  return <SubmitApp onLogout={handleLogout} onOpenLeaderboard={openLeaderboard} session={session} />;
 }

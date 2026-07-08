@@ -2,6 +2,7 @@ import type { CellValue } from "../data/puzzle";
 import type { ScoreResult } from "./scoring";
 
 export interface SubmissionPayload {
+  authToken?: string;
   puzzleId: string;
   teamName: string;
   round: number;
@@ -29,6 +30,7 @@ interface CreateSubmissionPayloadArgs {
   round: number;
   maxRounds: number;
   answers: Record<number, CellValue>;
+  authToken?: string;
   score: ScoreResult;
 }
 
@@ -38,9 +40,11 @@ export function createSubmissionPayload({
   round,
   maxRounds,
   answers,
+  authToken,
   score
 }: CreateSubmissionPayloadArgs): SubmissionPayload {
   return {
+    authToken,
     puzzleId,
     teamName,
     round,
