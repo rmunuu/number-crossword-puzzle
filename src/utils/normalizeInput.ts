@@ -6,7 +6,7 @@ export function normalizeInput(key: string, code = ""): CellValue | null {
   if (key === "-") return "-";
   if (key === "*") return "×";
   if (key === "/") return "÷";
-  if (key === "f" || key === "F" || key === "ㄹ" || code === "KeyF") return "!";
+  if (key === "!") return "!";
   if (key === "r" || key === "R" || key === "ㄱ" || code === "KeyR") return "√";
   return null;
 }

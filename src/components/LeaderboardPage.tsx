@@ -115,7 +115,7 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
                 <tr>
                   <th>순위</th>
                   <th>팀명</th>
-                  <th>맞춘 개수</th>
+                  <th>맞힌 개수</th>
                   <th>남은 횟수</th>
                   <th>제출 시각</th>
                 </tr>
