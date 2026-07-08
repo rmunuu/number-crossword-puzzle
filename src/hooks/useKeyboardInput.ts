@@ -64,7 +64,7 @@ export function useKeyboardInput({
         return;
       }
 
-      const normalizedInput = normalizeInput(event.key);
+      const normalizedInput = normalizeInput(event.key, event.code);
       if (normalizedInput !== null) {
         event.preventDefault();
         onInput(normalizedInput);

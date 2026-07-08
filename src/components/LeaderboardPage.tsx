@@ -22,8 +22,8 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
   const [message, setMessage] = useState("");
   const [source, setSource] = useState<"endpoint" | "local">("local");
 
-  const refreshLeaderboard = useCallback(async () => {
-    setIsLoading(true);
+  const refreshLeaderboard = useCallback(async (options: { silent?: boolean } = {}) => {
+    if (!options.silent) setIsLoading(true);
     setMessage("");
 
     try {
@@ -36,12 +36,20 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "리더보드를 불러오지 못했습니다.");
     } finally {
-      setIsLoading(false);
+      if (!options.silent) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
     void refreshLeaderboard();
+  }, [refreshLeaderboard]);
+
+  useEffect(() => {
+    const refreshIntervalId = window.setInterval(() => {
+      void refreshLeaderboard({ silent: true });
+    }, 10_000);
+
+    return () => window.clearInterval(refreshIntervalId);
   }, [refreshLeaderboard]);
 
   const handleReset = useCallback(async () => {
@@ -85,7 +93,9 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
             type="button"
             className="secondary-action compact-action"
             disabled={isLoading}
-            onClick={refreshLeaderboard}
+            onClick={() => {
+              void refreshLeaderboard();
+            }}
           >
             <RefreshCw size={18} aria-hidden="true" />
             새로고침
