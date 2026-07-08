@@ -20,6 +20,10 @@ export interface LeaderboardResult {
 const TIMESTAMP_MODE_ISO_TEXT = "iso-text-v2";
 const LEGACY_ENDPOINT_TIME_SHIFT_MS = 7 * 60 * 60 * 1000;
 
+type EndpointLeaderboardEntry = Partial<LeaderboardEntry> & {
+  maxRounds?: number;
+};
+
 function compareLeaderboardEntries(a: LeaderboardEntry, b: LeaderboardEntry): number {
   return b.correctCells - a.correctCells || new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
 }
@@ -65,6 +69,27 @@ function normalizeEndpointSubmittedAt(value: string, timestampMode: unknown): st
   return new Date(timestamp + LEGACY_ENDPOINT_TIME_SHIFT_MS).toISOString();
 }
 
+function normalizeSubmissionCount(candidate: EndpointLeaderboardEntry): number {
+  if (typeof candidate.submissionCount === "number") {
+    return Math.max(0, Math.floor(candidate.submissionCount));
+  }
+
+  if (typeof candidate.round === "number") {
+    return Math.max(0, Math.floor(candidate.round));
+  }
+
+  return 0;
+}
+
+function normalizeRemainingRounds(candidate: EndpointLeaderboardEntry, submissionCount: number): number {
+  const maxRounds =
+    typeof candidate.maxRounds === "number" && candidate.maxRounds > 0
+      ? Math.floor(candidate.maxRounds)
+      : MAX_SUBMISSION_ROUNDS;
+
+  return Math.max(0, maxRounds - submissionCount);
+}
+
 function normalizeEndpointEntries(value: unknown): LeaderboardEntry[] {
   const timestampMode =
     value && typeof value === "object" ? (value as { timestampMode?: unknown }).timestampMode : undefined;
@@ -77,24 +102,25 @@ function normalizeEndpointEntries(value: unknown): LeaderboardEntry[] {
   return entries
     .map((entry) => {
       if (!entry || typeof entry !== "object") return null;
-      const candidate = entry as Partial<LeaderboardEntry>;
+      const candidate = entry as EndpointLeaderboardEntry;
       if (
         typeof candidate.teamName !== "string" ||
         typeof candidate.correctCells !== "number" ||
         typeof candidate.totalCells !== "number" ||
-        typeof candidate.remainingRounds !== "number" ||
         typeof candidate.submittedAt !== "string"
       ) {
         return null;
       }
 
+      const submissionCount = normalizeSubmissionCount(candidate);
+
       return {
         teamName: candidate.teamName,
         correctCells: candidate.correctCells,
         totalCells: candidate.totalCells,
-        remainingRounds: candidate.remainingRounds,
+        remainingRounds: normalizeRemainingRounds(candidate, submissionCount),
         submittedAt: normalizeEndpointSubmittedAt(candidate.submittedAt, timestampMode),
-        submissionCount: typeof candidate.submissionCount === "number" ? candidate.submissionCount : 0,
+        submissionCount,
         round: typeof candidate.round === "number" ? candidate.round : 0
       };
     })

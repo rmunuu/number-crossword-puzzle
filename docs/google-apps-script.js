@@ -128,6 +128,7 @@ function getLeaderboardEntries(puzzleId) {
       teamName,
       correctCells,
       totalCells,
+      maxRounds,
       remainingRounds: 0,
       submittedAt,
       submissionCount: 0,
@@ -150,6 +151,7 @@ function getLeaderboardEntries(puzzleId) {
       const record = teamMap[teamName];
       const best = record.best;
       best.submissionCount = record.submissions;
+      best.maxRounds = record.maxRounds;
       best.remainingRounds = Math.max(0, record.maxRounds - record.submissions);
       return best;
     })
