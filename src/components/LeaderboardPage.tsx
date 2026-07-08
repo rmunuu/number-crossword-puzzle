@@ -1,18 +1,10 @@
 import { ArrowLeft, RefreshCw, RotateCcw, ShieldAlert, Trophy } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { formatSeoulSubmittedAt } from "../utils/dateTime";
 import { loadLeaderboard, resetLeaderboard, type LeaderboardEntry } from "../utils/leaderboard";
 
 interface LeaderboardPageProps {
   onBack: () => void;
-}
-
-function formatSubmittedAt(value: string): string {
-  return new Intl.DateTimeFormat("ko-KR", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(new Date(value));
 }
 
 export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
@@ -147,7 +139,7 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
                       </strong>
                     </td>
                     <td>{entry.remainingRounds}</td>
-                    <td>{formatSubmittedAt(entry.submittedAt)}</td>
+                    <td>{formatSeoulSubmittedAt(entry.submittedAt)}</td>
                   </tr>
                 ))}
               </tbody>

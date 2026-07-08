@@ -1,4 +1,5 @@
 import { History } from "lucide-react";
+import { formatSeoulSubmittedAt } from "../utils/dateTime";
 import type { SubmissionRecord } from "../utils/submissionHistory";
 
 interface SubmissionHistoryProps {
@@ -8,15 +9,6 @@ interface SubmissionHistoryProps {
   selectedRecordId: string | null;
   onLoadSelectedRecord: () => void;
   onSelectRecord: (recordId: string) => void;
-}
-
-function formatSubmittedAt(value: string): string {
-  return new Intl.DateTimeFormat("ko-KR", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(new Date(value));
 }
 
 export function SubmissionHistory({
@@ -52,7 +44,7 @@ export function SubmissionHistory({
               <strong>
                 {record.score.correctCells} / {record.score.totalCells}
               </strong>
-              <small>{formatSubmittedAt(record.submittedAt)}</small>
+              <small>{formatSeoulSubmittedAt(record.submittedAt)}</small>
             </button>
           ))}
         </div>
