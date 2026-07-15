@@ -1,4 +1,5 @@
 import { HelpCircle, RotateCcw, Send } from "lucide-react";
+import type { ReactNode } from "react";
 
 interface SubmitPanelProps {
   disabled: boolean;
@@ -11,6 +12,7 @@ interface SubmitPanelProps {
   reviewMode: boolean;
   submissionCount: number;
   teamName: string;
+  teamSelector?: ReactNode;
 }
 
 export function SubmitPanel({
@@ -23,7 +25,8 @@ export function SubmitPanel({
   onSubmit,
   reviewMode,
   submissionCount,
-  teamName
+  teamName,
+  teamSelector
 }: SubmitPanelProps) {
   const hasSubmissionSlot = submissionCount < maxSubmissions;
   const remainingSubmissions = Math.max(0, maxSubmissions - submissionCount);
@@ -32,11 +35,13 @@ export function SubmitPanel({
   return (
     <section className="submit-panel" aria-label="제출">
       <div>
-        <span className="panel-label">현재 팀</span>
-        <strong>{teamName || "미선택"}</strong>
-        <p>
-          남은 제출기회 {remainingSubmissions}회
-        </p>
+        {teamSelector ?? (
+          <>
+            <span className="panel-label">팀</span>
+            <strong>{teamName || "미선택"}</strong>
+          </>
+        )}
+        <p>남은 제출기회 {remainingSubmissions}회</p>
       </div>
       <div className="submit-actions">
         <button type="button" className="secondary-action guide-action" onClick={onShowGuide}>

@@ -72,16 +72,6 @@ interface SubmitAppProps {
   session: AuthSession;
 }
 
-function TeamLockPanel({ teamName }: { teamName: string }) {
-  return (
-    <section className="team-lock-panel" aria-label="인증된 팀">
-      <span>팀</span>
-      <strong>{teamName}</strong>
-      <small>PIN 인증됨</small>
-    </section>
-  );
-}
-
 function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
   const isAdmin = session.role === "admin";
   const [teamName, setTeamName] = useState("");
@@ -291,16 +281,7 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
       />
 
       <main className="app-main">
-        <section className="control-band">
-          {isAdmin ? (
-            <TeamSelector value={teamName} onChange={handleTeamChange} />
-          ) : (
-            <TeamLockPanel teamName={teamName || session.teamName} />
-          )}
-          <SymbolInventory counts={symbolCounts} />
-        </section>
-
-        <div className="submit-row">
+        <section className="top-dashboard">
           <SubmitPanel
             disabled={!teamName}
             isSubmitting={isSubmitting}
@@ -312,6 +293,7 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
             reviewMode={reviewMode}
             submissionCount={submissionHistory.length}
             teamName={teamName}
+            teamSelector={isAdmin ? <TeamSelector value={teamName} onChange={handleTeamChange} /> : undefined}
           />
           <SubmissionHistory
             canLoadRecord={hasSubmissionSlot}
@@ -321,7 +303,8 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
             selectedRecordId={reviewRecordId}
             onSelectRecord={setReviewRecordId}
           />
-        </div>
+          <SymbolInventory counts={symbolCounts} />
+        </section>
 
         <div className="board-row">
           <PuzzleGrid
