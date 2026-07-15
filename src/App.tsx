@@ -226,10 +226,12 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
 
     try {
       const result = await submitPayload(payload);
+      const savedRound = result.round ?? round;
+      const savedSubmittedAt = result.submittedAt ?? payload.submittedAt;
       const record: SubmissionRecord = {
-        id: `${puzzle.puzzleId}:${teamName}:${round}:${payload.submittedAt}`,
-        round,
-        submittedAt: payload.submittedAt,
+        id: `${puzzle.puzzleId}:${teamName}:${savedRound}:${savedSubmittedAt}`,
+        round: savedRound,
+        submittedAt: savedSubmittedAt,
         answers: completeAnswers,
         score,
         delivery: result.delivery
@@ -243,8 +245,8 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
         kind: "success",
         message:
           result.delivery === "endpoint"
-            ? `${round}회차 답안이 제출 저장소에 기록되었습니다.`
-            : `${round}회차 답안이 이 브라우저의 제출 기록에 저장되었습니다.`
+            ? `${savedRound}회차 답안이 제출 저장소에 기록되었습니다.`
+            : `${savedRound}회차 답안이 이 브라우저의 제출 기록에 저장되었습니다.`
       });
     } catch (error) {
       setModal({
@@ -277,7 +279,6 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
         authLabel={isAdmin ? "관리자" : session.teamName}
         onLogout={onLogout}
         onOpenLeaderboard={onOpenLeaderboard}
-        totalCells={puzzle.totalCells}
       />
 
       <main className="app-main">

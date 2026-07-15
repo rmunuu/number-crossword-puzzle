@@ -15,6 +15,7 @@ const HEADER = [
 
 const DEFAULT_SHEET_NAME = "Submissions";
 const TIMESTAMP_MODE = "iso-text-v2";
+const MAX_SUBMISSION_ROUNDS = 3;
 const RESET_AT_PROPERTY_PREFIX = "RESET_AT:";
 const SESSION_PROPERTY_PREFIX = "SESSION:";
 const TEAM_CODES_PROPERTY = "TEAM_CODES_JSON";
@@ -61,8 +62,8 @@ function doPost(e) {
       return jsonResponse({ ok: true, resetAt });
     }
 
-    appendSubmission(payload);
-    return jsonResponse({ ok: true });
+    const result = appendSubmission(payload);
+    return jsonResponse({ ok: true, ...result });
   } catch (error) {
     return jsonResponse({ ok: false, error: String(error.message || error) });
   }
@@ -221,14 +222,20 @@ function appendSubmission(payload) {
 
   const sheet = getSubmissionSheet();
   ensureHeader(sheet);
+  const existingRoundCount = getSubmittedRoundCount(payload.puzzleId, payload.teamName);
+  if (existingRoundCount >= MAX_SUBMISSION_ROUNDS) {
+    throw new Error("이 팀은 제출 기회를 모두 사용했습니다.");
+  }
+
   const submittedAt = payload.submittedAt || new Date().toISOString();
+  const round = existingRoundCount + 1;
 
   sheet.appendRow([
     submittedAt,
     payload.puzzleId,
     payload.teamName,
-    payload.round,
-    payload.maxRounds,
+    round,
+    MAX_SUBMISSION_ROUNDS,
     payload.score.filledCells,
     payload.score.correctCells,
     payload.score.incorrectCells,
@@ -237,6 +244,31 @@ function appendSubmission(payload) {
     JSON.stringify(payload.answers),
     payload.userAgent || ""
   ]);
+
+  return {
+    round,
+    submittedAt,
+    maxRounds: MAX_SUBMISSION_ROUNDS,
+    remainingRounds: Math.max(0, MAX_SUBMISSION_ROUNDS - round)
+  };
+}
+
+function getSubmittedRoundCount(puzzleId, teamName) {
+  const sheet = getSubmissionSheet();
+  ensureHeader(sheet);
+
+  const rounds = {};
+  getDataRows(sheet).forEach((row) => {
+    if (puzzleId && row[1] !== puzzleId) return;
+    if (row[2] !== teamName) return;
+
+    const round = Number(row[3] || 0);
+    if (round > 0) {
+      rounds[String(round)] = true;
+    }
+  });
+
+  return Object.keys(rounds).length;
 }
 
 function getLeaderboardEntries(puzzleId) {
@@ -254,7 +286,7 @@ function getLeaderboardEntries(puzzleId) {
 
     const submittedAt = toIsoString(row[0]);
     const round = Number(row[3] || 0);
-    const maxRounds = Math.min(3, Number(row[4] || 3));
+    const maxRounds = MAX_SUBMISSION_ROUNDS;
     const correctCells = Number(row[6] || 0);
     const totalCells = Number(row[8] || 0);
 

@@ -17,11 +17,15 @@ export type SubmissionDelivery = "endpoint" | "local";
 
 export interface SubmissionResult {
   delivery: SubmissionDelivery;
+  round?: number;
+  submittedAt?: string;
 }
 
 interface EndpointResponsePayload {
   ok?: boolean;
   error?: string;
+  round?: number;
+  submittedAt?: string;
 }
 
 interface CreateSubmissionPayloadArgs {
@@ -103,5 +107,9 @@ export async function submitPayload(payload: SubmissionPayload): Promise<Submiss
     throw new Error(responsePayload.error || "답안을 제출하지 못했습니다.");
   }
 
-  return { delivery: "endpoint" };
+  return {
+    delivery: "endpoint",
+    round: responsePayload?.round,
+    submittedAt: responsePayload?.submittedAt
+  };
 }

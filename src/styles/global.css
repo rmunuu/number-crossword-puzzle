@@ -91,18 +91,6 @@ h1 {
   line-height: 1.2;
 }
 
-.cell-count-badge {
-  display: inline-flex;
-  min-width: 68px;
-  justify-content: center;
-  border: 1px solid #93c5fd;
-  border-radius: 999px;
-  padding: 7px 11px;
-  color: #174ea6;
-  background: #eff6ff;
-  font-weight: 800;
-}
-
 .session-badge {
   display: inline-flex;
   min-height: 34px;

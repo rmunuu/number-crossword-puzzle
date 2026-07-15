@@ -4,10 +4,9 @@ interface HeaderProps {
   authLabel?: string;
   onLogout?: () => void;
   onOpenLeaderboard: () => void;
-  totalCells: number;
 }
 
-export function Header({ authLabel, onLogout, onOpenLeaderboard, totalCells }: HeaderProps) {
+export function Header({ authLabel, onLogout, onOpenLeaderboard }: HeaderProps) {
   return (
     <header className="app-header">
       <div className="header-mark" aria-hidden="true">
@@ -19,7 +18,6 @@ export function Header({ authLabel, onLogout, onOpenLeaderboard, totalCells }: H
       </div>
       <div className="header-actions">
         {authLabel ? <span className="session-badge">{authLabel}</span> : null}
-        <span className="cell-count-badge">{totalCells}칸</span>
         <button type="button" className="secondary-action compact-action" onClick={onOpenLeaderboard}>
           <Trophy size={18} aria-hidden="true" />
           리더보드
