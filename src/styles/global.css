@@ -182,15 +182,11 @@ h1 {
 }
 
 .app-main {
-  width: min(1480px, calc(100% - 28px));
+  width: min(1260px, calc(100% - 28px));
   margin: 22px auto 40px;
 }
 
-.top-dashboard {
-  display: grid;
-  grid-template-columns: minmax(300px, 0.8fr) minmax(350px, 0.9fr) minmax(660px, 1.45fr);
-  gap: 14px;
-  align-items: start;
+.inventory-band {
   margin-bottom: 18px;
 }
 
@@ -259,7 +255,7 @@ h1 {
 
 .symbol-count-grid {
   display: grid;
-  grid-template-columns: repeat(8, minmax(78px, 1fr));
+  grid-template-columns: repeat(8, minmax(82px, 1fr));
   gap: 8px;
 }
 
@@ -329,9 +325,16 @@ h1 {
 
 .board-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  grid-template-columns: max-content minmax(360px, 390px);
   gap: 18px;
-  align-items: stretch;
+  align-items: start;
+  justify-content: center;
+}
+
+.board-sidebar {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
 }
 
 .primary-action:disabled,
@@ -474,8 +477,7 @@ h1 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  min-height: 100%;
-  max-height: 676px;
+  max-height: 360px;
   overflow: auto;
   padding: 14px;
 }
@@ -486,13 +488,13 @@ h1 {
 
 .clue-column dl {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   margin: 12px 0 0;
 }
 
 .clue-column div {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-columns: 36px minmax(0, 1fr);
   gap: 8px;
   align-items: baseline;
 }
@@ -505,6 +507,7 @@ h1 {
 .clue-column dd {
   margin: 0;
   overflow-wrap: anywhere;
+  font-size: 1.02rem;
   font-weight: 700;
 }
 
@@ -749,28 +752,14 @@ h1 {
   font-weight: 900;
 }
 
-@media (max-width: 1360px) {
-  .top-dashboard {
-    grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
-  }
-
-  .symbol-inventory {
-    grid-column: 1 / -1;
-  }
-
-  .symbol-count-grid {
-    grid-template-columns: repeat(8, minmax(78px, 1fr));
-  }
-}
-
 @media (max-width: 860px) {
-  .top-dashboard,
   .board-row {
     grid-template-columns: 1fr;
+    justify-content: stretch;
   }
 
-  .symbol-inventory {
-    grid-column: auto;
+  .board-sidebar {
+    width: 100%;
   }
 
   .symbol-count-grid {

@@ -281,28 +281,7 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
       />
 
       <main className="app-main">
-        <section className="top-dashboard">
-          <SubmitPanel
-            disabled={!teamName}
-            isSubmitting={isSubmitting}
-            maxSubmissions={MAX_SUBMISSION_ROUNDS}
-            onExitReview={() => setReviewRecordId(null)}
-            onReset={handleReset}
-            onShowGuide={() => setIsGuideOpen(true)}
-            onSubmit={handleSubmitRequest}
-            reviewMode={reviewMode}
-            submissionCount={submissionHistory.length}
-            teamName={teamName}
-            teamSelector={isAdmin ? <TeamSelector value={teamName} onChange={handleTeamChange} /> : undefined}
-          />
-          <SubmissionHistory
-            canLoadRecord={hasSubmissionSlot}
-            maxSubmissions={MAX_SUBMISSION_ROUNDS}
-            onLoadSelectedRecord={handleLoadSelectedRecordForEdit}
-            records={submissionHistory}
-            selectedRecordId={reviewRecordId}
-            onSelectRecord={setReviewRecordId}
-          />
+        <section className="inventory-band">
           <SymbolInventory counts={symbolCounts} />
         </section>
 
@@ -315,7 +294,30 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
             selectedCellId={reviewMode ? null : selectedCellId}
             onSelectCell={setSelectedCellId}
           />
-          <ClueList entries={puzzle.entries} />
+          <aside className="board-sidebar" aria-label="제출 정보">
+            <ClueList entries={puzzle.entries} />
+            <SubmitPanel
+              disabled={!teamName}
+              isSubmitting={isSubmitting}
+              maxSubmissions={MAX_SUBMISSION_ROUNDS}
+              onExitReview={() => setReviewRecordId(null)}
+              onReset={handleReset}
+              onShowGuide={() => setIsGuideOpen(true)}
+              onSubmit={handleSubmitRequest}
+              reviewMode={reviewMode}
+              submissionCount={submissionHistory.length}
+              teamName={teamName}
+              teamSelector={isAdmin ? <TeamSelector value={teamName} onChange={handleTeamChange} /> : undefined}
+            />
+            <SubmissionHistory
+              canLoadRecord={hasSubmissionSlot}
+              maxSubmissions={MAX_SUBMISSION_ROUNDS}
+              onLoadSelectedRecord={handleLoadSelectedRecordForEdit}
+              records={submissionHistory}
+              selectedRecordId={reviewRecordId}
+              onSelectRecord={setReviewRecordId}
+            />
+          </aside>
         </div>
       </main>
 
