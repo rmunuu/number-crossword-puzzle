@@ -27,6 +27,14 @@ export function SubmissionHistory({
         <span>
           {records.length} / {maxSubmissions}
         </span>
+        <button
+          type="button"
+          className="history-edit-action"
+          disabled={!selectedRecordId || !canLoadRecord}
+          onClick={onLoadSelectedRecord}
+        >
+          선택 기록 수정
+        </button>
       </div>
 
       {records.length === 0 ? (
@@ -49,14 +57,6 @@ export function SubmissionHistory({
           ))}
         </div>
       )}
-      <button
-        type="button"
-        className="history-edit-action"
-        disabled={!selectedRecordId || !canLoadRecord}
-        onClick={onLoadSelectedRecord}
-      >
-        선택 기록 수정
-      </button>
     </section>
   );
 }
