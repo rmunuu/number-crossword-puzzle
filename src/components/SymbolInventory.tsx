@@ -34,7 +34,7 @@ export function SymbolInventory({ counts }: SymbolInventoryProps) {
             >
               <span className="symbol-token">{valueLabels[count.value]}</span>
               <strong>
-                {count.used} / {count.total}
+                {count.used}/{count.total}
               </strong>
               <span className="symbol-meter" aria-hidden="true">
                 <span style={{ width: `${fillRatio * 100}%` }} />

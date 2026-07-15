@@ -182,15 +182,15 @@ h1 {
 }
 
 .app-main {
-  width: min(1180px, calc(100% - 28px));
+  width: min(1480px, calc(100% - 28px));
   margin: 22px auto 40px;
 }
 
 .top-dashboard {
   display: grid;
-  grid-template-columns: minmax(380px, 0.95fr) minmax(360px, 1.05fr) minmax(300px, 0.8fr);
+  grid-template-columns: minmax(300px, 0.8fr) minmax(350px, 0.9fr) minmax(660px, 1.45fr);
   gap: 14px;
-  align-items: stretch;
+  align-items: start;
   margin-bottom: 18px;
 }
 
@@ -204,8 +204,7 @@ h1 {
   background: var(--surface);
 }
 
-.team-selector,
-.submit-team-selector {
+.team-selector {
   display: grid;
   gap: 8px;
 }
@@ -240,7 +239,7 @@ h1 {
 
 .symbol-inventory {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   align-content: start;
   padding: 14px;
 }
@@ -260,19 +259,19 @@ h1 {
 
 .symbol-count-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(58px, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(8, minmax(78px, 1fr));
+  gap: 8px;
 }
 
 .symbol-count {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 6px;
+  grid-template-columns: 1fr;
+  gap: 4px;
   align-items: center;
-  min-height: 38px;
+  min-height: 62px;
   border: 1px solid #d8e0ec;
   border-radius: 8px;
-  padding: 6px 8px;
+  padding: 8px 10px;
   background: #f8fafc;
 }
 
@@ -288,18 +287,20 @@ h1 {
 
 .symbol-token {
   display: inline-grid;
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 26px;
   place-items: center;
   border-radius: 6px;
   color: #0f172a;
   background: #fff;
+  font-size: 1.08rem;
   font-weight: 900;
 }
 
 .symbol-count strong {
-  justify-self: end;
-  font-size: 0.82rem;
+  justify-self: start;
+  font-size: 0.95rem;
+  line-height: 1.1;
   white-space: nowrap;
 }
 
@@ -342,14 +343,14 @@ h1 {
 .submit-panel {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 14px;
   align-content: start;
   padding: 14px;
 }
 
 .submit-panel strong {
   display: block;
-  margin-top: 4px;
+  margin-top: 3px;
   font-size: 1.22rem;
   line-height: 1.25;
   white-space: nowrap;
@@ -364,13 +365,14 @@ h1 {
 
 .history-panel {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr) 150px;
   gap: 10px;
   align-content: start;
   padding: 14px;
 }
 
 .history-heading {
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 8px;
@@ -391,9 +393,13 @@ h1 {
 }
 
 .empty-history {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
   margin: 0;
   color: var(--muted);
   font-size: 0.9rem;
+  font-weight: 800;
 }
 
 .history-list {
@@ -408,8 +414,9 @@ h1 {
   grid-template-columns: auto auto;
   gap: 3px 8px;
   align-items: center;
-  min-width: 116px;
-  min-height: 46px;
+  flex: 1 1 0;
+  min-width: 112px;
+  min-height: 50px;
   border: 1px solid #d1d9e8;
   border-radius: 8px;
   padding: 7px 10px;
@@ -444,7 +451,7 @@ h1 {
 
 .history-edit-action {
   width: 100%;
-  min-height: 40px;
+  min-height: 50px;
   border: 1px solid #bfdbfe;
   border-radius: 8px;
   color: #174ea6;
@@ -742,7 +749,7 @@ h1 {
   font-weight: 900;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1360px) {
   .top-dashboard {
     grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
   }
@@ -752,7 +759,7 @@ h1 {
   }
 
   .symbol-count-grid {
-    grid-template-columns: repeat(8, minmax(58px, 1fr));
+    grid-template-columns: repeat(8, minmax(78px, 1fr));
   }
 }
 
@@ -767,7 +774,7 @@ h1 {
   }
 
   .symbol-count-grid {
-    grid-template-columns: repeat(4, minmax(58px, 1fr));
+    grid-template-columns: repeat(4, minmax(78px, 1fr));
   }
 }
 
