@@ -254,7 +254,7 @@ function getLeaderboardEntries(puzzleId) {
 
     const submittedAt = toIsoString(row[0]);
     const round = Number(row[3] || 0);
-    const maxRounds = Number(row[4] || 5);
+    const maxRounds = Math.min(3, Number(row[4] || 3));
     const correctCells = Number(row[6] || 0);
     const totalCells = Number(row[8] || 0);
 

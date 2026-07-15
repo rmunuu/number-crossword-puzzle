@@ -2,7 +2,6 @@ import { HelpCircle, RotateCcw, Send } from "lucide-react";
 
 interface SubmitPanelProps {
   disabled: boolean;
-  filledCells: number;
   isSubmitting: boolean;
   maxSubmissions: number;
   onExitReview: () => void;
@@ -12,12 +11,10 @@ interface SubmitPanelProps {
   reviewMode: boolean;
   submissionCount: number;
   teamName: string;
-  totalCells: number;
 }
 
 export function SubmitPanel({
   disabled,
-  filledCells,
   isSubmitting,
   maxSubmissions,
   onExitReview,
@@ -26,10 +23,10 @@ export function SubmitPanel({
   onSubmit,
   reviewMode,
   submissionCount,
-  teamName,
-  totalCells
+  teamName
 }: SubmitPanelProps) {
   const hasSubmissionSlot = submissionCount < maxSubmissions;
+  const remainingSubmissions = Math.max(0, maxSubmissions - submissionCount);
   const submitLabel = !hasSubmissionSlot ? "제출 완료" : isSubmitting ? "제출 중" : `${submissionCount + 1}회차 제출`;
 
   return (
@@ -38,10 +35,7 @@ export function SubmitPanel({
         <span className="panel-label">현재 팀</span>
         <strong>{teamName || "미선택"}</strong>
         <p>
-          {filledCells} / {totalCells}칸 입력
-        </p>
-        <p>
-          제출 기회 {submissionCount} / {maxSubmissions}회 사용
+          남은 제출기회 {remainingSubmissions}회
         </p>
       </div>
       <div className="submit-actions">

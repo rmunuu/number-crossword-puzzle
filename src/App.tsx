@@ -2,16 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ClueList } from "./components/ClueList";
 import { Header } from "./components/Header";
 import { InputGuideModal } from "./components/InputGuideModal";
-import { InputPad } from "./components/InputPad";
 import { LeaderboardPage } from "./components/LeaderboardPage";
 import { LoginPage } from "./components/LoginPage";
-import { ProgressBar } from "./components/ProgressBar";
 import { PuzzleGrid } from "./components/PuzzleGrid";
 import { SubmissionHistory } from "./components/SubmissionHistory";
 import { SubmitPanel } from "./components/SubmitPanel";
 import { SubmitResultModal, type SubmitModalKind } from "./components/SubmitResultModal";
+import { SymbolInventory, type SymbolCount } from "./components/SymbolInventory";
 import { TeamSelector } from "./components/TeamSelector";
-import type { CellValue } from "./data/puzzle";
+import { ENTERABLE_VALUES, type CellValue } from "./data/puzzle";
 import { puzzle } from "./data/puzzle";
 import { solution } from "./data/solution";
 import { clearProgress, loadProgress, saveProgress } from "./hooks/useLocalStorage";
@@ -44,6 +43,27 @@ function getCellStatuses(answers: Record<number, CellValue>): Record<number, "co
   return Object.fromEntries(
     puzzle.cells.map((cell) => [cell.id, (answers[cell.id] ?? "") === solution[cell.id] ? "correct" : "incorrect"])
   ) as Record<number, "correct" | "incorrect">;
+}
+
+function getSymbolCounts(answers: Record<number, CellValue>): SymbolCount[] {
+  const totals = new Map<CellValue, number>();
+  const used = new Map<CellValue, number>();
+
+  for (const value of Object.values(solution)) {
+    if (!value) continue;
+    totals.set(value, (totals.get(value) ?? 0) + 1);
+  }
+
+  for (const value of Object.values(answers)) {
+    if (!value) continue;
+    used.set(value, (used.get(value) ?? 0) + 1);
+  }
+
+  return ENTERABLE_VALUES.map((value) => ({
+    value,
+    total: totals.get(value) ?? 0,
+    used: used.get(value) ?? 0
+  }));
 }
 
 interface SubmitAppProps {
@@ -92,6 +112,7 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
   const inputDisabled = !teamName || isSubmitting || reviewMode || !hasSubmissionSlot;
   const missingCells = useMemo(() => puzzle.totalCells - filledCount, [filledCount]);
   const visibleAnswers = selectedReviewRecord?.answers ?? answers;
+  const symbolCounts = useMemo(() => getSymbolCounts(visibleAnswers), [visibleAnswers]);
   const visibleCellStatuses = useMemo(
     () => (selectedReviewRecord ? getCellStatuses(selectedReviewRecord.answers) : undefined),
     [selectedReviewRecord]
@@ -193,7 +214,7 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
     if (submissionHistory.length >= MAX_SUBMISSION_ROUNDS) {
       setModal({
         kind: "error",
-        message: "이미 5번의 제출 기회를 모두 사용했습니다."
+        message: "이미 3번의 제출 기회를 모두 사용했습니다."
       });
       return;
     }
@@ -276,10 +297,10 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
           ) : (
             <TeamLockPanel teamName={teamName || session.teamName} />
           )}
-          <ProgressBar filled={filledCount} total={puzzle.totalCells} />
+          <SymbolInventory counts={symbolCounts} />
         </section>
 
-        <div className="workspace">
+        <div className="board-row">
           <PuzzleGrid
             answers={visibleAnswers}
             cellStatuses={visibleCellStatuses}
@@ -288,33 +309,30 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
             selectedCellId={reviewMode ? null : selectedCellId}
             onSelectCell={setSelectedCellId}
           />
+          <ClueList entries={puzzle.entries} />
+        </div>
 
-          <aside className="side-panel">
-            <InputPad disabled={inputDisabled} onClear={clearValue} onInput={inputValue} />
-            <SubmitPanel
-              disabled={!teamName}
-              filledCells={filledCount}
-              isSubmitting={isSubmitting}
-              maxSubmissions={MAX_SUBMISSION_ROUNDS}
-              onExitReview={() => setReviewRecordId(null)}
-              onReset={handleReset}
-              onShowGuide={() => setIsGuideOpen(true)}
-              onSubmit={handleSubmitRequest}
-              reviewMode={reviewMode}
-              submissionCount={submissionHistory.length}
-              teamName={teamName}
-              totalCells={puzzle.totalCells}
-            />
-            <SubmissionHistory
-              canLoadRecord={hasSubmissionSlot}
-              maxSubmissions={MAX_SUBMISSION_ROUNDS}
-              onLoadSelectedRecord={handleLoadSelectedRecordForEdit}
-              records={submissionHistory}
-              selectedRecordId={reviewRecordId}
-              onSelectRecord={setReviewRecordId}
-            />
-            <ClueList entries={puzzle.entries} />
-          </aside>
+        <div className="submit-row">
+          <SubmitPanel
+            disabled={!teamName}
+            isSubmitting={isSubmitting}
+            maxSubmissions={MAX_SUBMISSION_ROUNDS}
+            onExitReview={() => setReviewRecordId(null)}
+            onReset={handleReset}
+            onShowGuide={() => setIsGuideOpen(true)}
+            onSubmit={handleSubmitRequest}
+            reviewMode={reviewMode}
+            submissionCount={submissionHistory.length}
+            teamName={teamName}
+          />
+          <SubmissionHistory
+            canLoadRecord={hasSubmissionSlot}
+            maxSubmissions={MAX_SUBMISSION_ROUNDS}
+            onLoadSelectedRecord={handleLoadSelectedRecordForEdit}
+            records={submissionHistory}
+            selectedRecordId={reviewRecordId}
+            onSelectRecord={setReviewRecordId}
+          />
         </div>
       </main>
 

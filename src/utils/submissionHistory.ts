@@ -2,7 +2,7 @@ import { ENTERABLE_VALUES, type CellValue } from "../data/puzzle";
 import type { ScoreResult } from "./scoring";
 import type { SubmissionDelivery } from "./submission";
 
-export const MAX_SUBMISSION_ROUNDS = 5;
+export const MAX_SUBMISSION_ROUNDS = 3;
 
 export interface SubmissionRecord {
   id: string;

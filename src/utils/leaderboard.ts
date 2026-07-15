@@ -83,13 +83,8 @@ function normalizeSubmissionCount(candidate: EndpointLeaderboardEntry): number {
   return 0;
 }
 
-function normalizeRemainingRounds(candidate: EndpointLeaderboardEntry, submissionCount: number): number {
-  const maxRounds =
-    typeof candidate.maxRounds === "number" && candidate.maxRounds > 0
-      ? Math.floor(candidate.maxRounds)
-      : MAX_SUBMISSION_ROUNDS;
-
-  return Math.max(0, maxRounds - submissionCount);
+function normalizeRemainingRounds(_candidate: EndpointLeaderboardEntry, submissionCount: number): number {
+  return Math.max(0, MAX_SUBMISSION_ROUNDS - submissionCount);
 }
 
 function normalizeEndpointEntries(value: unknown): LeaderboardEntry[] {
