@@ -300,18 +300,6 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
           <SymbolInventory counts={symbolCounts} />
         </section>
 
-        <div className="board-row">
-          <PuzzleGrid
-            answers={visibleAnswers}
-            cellStatuses={visibleCellStatuses}
-            disabled={!teamName || reviewMode || !hasSubmissionSlot}
-            puzzle={puzzle}
-            selectedCellId={reviewMode ? null : selectedCellId}
-            onSelectCell={setSelectedCellId}
-          />
-          <ClueList entries={puzzle.entries} />
-        </div>
-
         <div className="submit-row">
           <SubmitPanel
             disabled={!teamName}
@@ -333,6 +321,18 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
             selectedRecordId={reviewRecordId}
             onSelectRecord={setReviewRecordId}
           />
+        </div>
+
+        <div className="board-row">
+          <PuzzleGrid
+            answers={visibleAnswers}
+            cellStatuses={visibleCellStatuses}
+            disabled={!teamName || reviewMode || !hasSubmissionSlot}
+            puzzle={puzzle}
+            selectedCellId={reviewMode ? null : selectedCellId}
+            onSelectCell={setSelectedCellId}
+          />
+          <ClueList entries={puzzle.entries} />
         </div>
       </main>
 

@@ -193,7 +193,7 @@ h1 {
   grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
   gap: 14px;
   align-items: stretch;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .team-selector,
@@ -340,10 +340,10 @@ h1 {
 
 .submit-row {
   display: grid;
-  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr);
   gap: 14px;
-  align-items: start;
-  margin-top: 18px;
+  align-items: stretch;
+  margin-bottom: 18px;
 }
 
 .primary-action:disabled,
@@ -354,7 +354,9 @@ h1 {
 
 .submit-panel {
   display: grid;
-  gap: 14px;
+  grid-template-columns: minmax(130px, auto) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
   padding: 14px;
 }
 
@@ -371,13 +373,15 @@ h1 {
 
 .history-panel {
   display: grid;
-  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
   padding: 14px;
 }
 
 .history-heading {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   gap: 8px;
   align-items: center;
 }
@@ -389,6 +393,7 @@ h1 {
 }
 
 .history-heading span {
+  grid-column: 1 / -1;
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 800;
@@ -401,19 +406,22 @@ h1 {
 }
 
 .history-list {
-  display: grid;
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
   gap: 8px;
 }
 
 .history-item {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) auto;
-  gap: 8px;
+  grid-template-columns: auto auto;
+  gap: 3px 8px;
   align-items: center;
-  min-height: 42px;
+  min-width: 128px;
+  min-height: 46px;
   border: 1px solid #d1d9e8;
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 7px 10px;
   color: var(--ink);
   background: #fff;
   cursor: pointer;
@@ -434,10 +442,16 @@ h1 {
 }
 
 .history-item strong {
+  justify-self: end;
   font-size: 0.92rem;
 }
 
+.history-item small {
+  grid-column: 1 / -1;
+}
+
 .history-edit-action {
+  min-width: 120px;
   min-height: 38px;
   border: 1px solid #bfdbfe;
   border-radius: 8px;
@@ -502,9 +516,12 @@ h1 {
   gap: 8px;
 }
 
-.guide-action,
 .single-action {
   grid-column: 1 / -1;
+}
+
+.submit-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .primary-action,
@@ -764,6 +781,15 @@ h1 {
 
   .score-list,
   .clue-list {
+    grid-template-columns: 1fr;
+  }
+
+  .submit-panel,
+  .history-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .submit-actions {
     grid-template-columns: 1fr;
   }
 
