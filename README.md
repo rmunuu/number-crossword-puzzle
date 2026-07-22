@@ -1,6 +1,6 @@
 # 수식퍼즐
 
-팀별로 수식퍼즐 답안을 웹에서 입력하고 제출하는 React + TypeScript + Vite 앱입니다.
+조별로 수식퍼즐 답안을 웹에서 입력하고 제출하는 React + TypeScript + Vite 앱입니다.
 
 ## 로컬 실행
 
@@ -29,16 +29,16 @@ VITE_BASE_PATH=
 - `VITE_SUBMISSION_ENDPOINT`: Google Apps Script Web App URL입니다.
 - `VITE_BASE_PATH`: GitHub Pages 저장소 경로를 직접 지정해야 할 때 사용합니다.
 
-## 팀명
+## 조명
 
-팀은 드롭다운에서만 선택합니다.
+조는 드롭다운에서만 선택합니다.
 
-- 수통 1팀, 2팀, 3팀, 4팀, 5팀, 6팀
-- 물리 1팀, 2팀, 3팀, 4팀, 5팀, 6팀, 7팀, 8팀
-- 천문 1팀, 2팀, 3팀, 4팀
-- 화학 1팀, 2팀, 3팀, 4팀, 5팀, 6팀, 7팀, 8팀, 9팀, 10팀
-- 생명 1팀, 2팀, 3팀, 4팀, 5팀, 6팀, 7팀, 8팀
-- 지구 1팀, 2팀, 3팀, 4팀, 5팀
+- 수통 1조, 2조, 3조, 4조, 5조, 6조
+- 물리 1조, 2조, 3조, 4조, 5조, 6조, 7조, 8조
+- 천문 1조, 2조, 3조, 4조
+- 화학 1조, 2조, 3조, 4조, 5조, 6조, 7조, 8조, 9조, 10조
+- 생명 1조, 2조, 3조, 4조, 5조, 6조, 7조, 8조
+- 지구 1조, 2조, 3조, 4조, 5조
 
 ## 입력 키
 
@@ -74,7 +74,7 @@ export const solution: Record<number, CellValue> = {
 
 ## 제출 저장
 
-팀별로 최대 3번 제출할 수 있습니다. 각 제출은 즉시 채점되고, 제출 기록은 브라우저 localStorage에 저장되어 다시 확인할 수 있습니다. 기록을 선택하면 제출 당시 답안만 보이고, 맞은 칸은 연한 파랑, 틀린 칸은 연한 빨강으로 표시됩니다. 선택한 기록은 현재 입력 화면으로 복사해 수정한 뒤 다음 회차로 다시 제출할 수 있습니다.
+조별로 최대 3번 제출할 수 있습니다. 각 제출은 즉시 채점되고, 제출 기록은 브라우저 localStorage에 저장되어 다시 확인할 수 있습니다. 기록을 선택하면 제출 당시 답안만 보이고, 맞은 칸은 연한 파랑, 틀린 칸은 연한 빨강으로 표시됩니다. 선택한 기록은 현재 입력 화면으로 복사해 수정한 뒤 다음 회차로 다시 제출할 수 있습니다.
 
 `VITE_SUBMISSION_ENDPOINT`가 있으면 Google Apps Script Web App으로 POST합니다. 없으면 제출 기록은 현재 브라우저 localStorage에만 저장됩니다. payload는 콘솔에도 출력됩니다.
 
@@ -84,11 +84,11 @@ Apps Script의 Script Properties에는 아래 값을 넣습니다.
 
 - `SPREADSHEET_ID`: Google Sheet URL의 `/d/`와 `/edit` 사이 ID
 - `SHEET_NAME`: 제출 기록을 저장할 시트 이름, 생략하면 `Submissions`
-- `TEAM_CODES_JSON`: 팀별 PIN JSON
+- `TEAM_CODES_JSON`: 조별 PIN JSON
 - `MASTER_CODE`: 관리자 로그인 및 전체 초기화 코드
 - `ADMIN_CODE`: 기존 초기화 코드, 초기화에는 `MASTER_CODE`와 `ADMIN_CODE` 둘 다 사용할 수 있음
 
-팀별 PIN 원본은 로컬의 `team-pins.private.json`에 둡니다. 이 파일은 GitHub에 올리지 않습니다.
+조별 PIN 원본은 로컬의 `team-pins.private.json`에 둡니다. 이 파일은 GitHub에 올리지 않습니다.
 
 Sheet 컬럼 예시:
 
@@ -98,15 +98,15 @@ timestamp, puzzleId, teamName, round, maxRounds, filledCells, correctCells, inco
 
 ## 리더보드
 
-제출 화면의 `리더보드` 버튼 또는 `#/leaderboard` 주소에서 팀별 순위를 볼 수 있습니다. 순위는 `맞힌 개수`가 많은 순서, 동점이면 `제출 시각`이 빠른 순서입니다.
+제출 화면의 `리더보드` 버튼 또는 `#/leaderboard` 주소에서 조별 순위를 볼 수 있습니다. 순위는 `맞힌 개수`가 많은 순서, 동점이면 `제출 시각`이 빠른 순서입니다.
 
 `VITE_SUBMISSION_ENDPOINT`가 설정되어 있으면 Google Sheet 전체 제출 기록을 기준으로 보여줍니다. endpoint가 없으면 현재 브라우저의 localStorage 기록만 표시합니다.
 
-관리자 초기화는 전체 게임 초기화입니다. 리더보드 화면에서 `초기화` 버튼을 누르고 Script Properties에 넣은 `MASTER_CODE` 또는 `ADMIN_CODE`를 입력하면 Google Sheet 제출 기록이 삭제되고, 각 브라우저는 reset 상태를 감지해 모든 팀의 입력 답안과 제출 기록을 지웁니다. 제출 화면과 리더보드 화면은 10초마다 reset 상태를 확인합니다.
+관리자 초기화는 전체 게임 초기화입니다. 리더보드 화면에서 `초기화` 버튼을 누르고 Script Properties에 넣은 `MASTER_CODE` 또는 `ADMIN_CODE`를 입력하면 Google Sheet 제출 기록이 삭제되고, 각 브라우저는 reset 상태를 감지해 모든 조의 입력 답안과 제출 기록을 지웁니다. 제출 화면과 리더보드 화면은 10초마다 reset 상태를 확인합니다.
 
-## 팀 PIN 인증
+## 조 PIN 인증
 
-시작 화면에서 팀과 PIN을 입력하면 해당 팀 제출 화면으로 들어갑니다. 학생 세션에서는 팀 선택을 바꿀 수 없고 자기 팀 제출 기록만 볼 수 있습니다. `MASTER_CODE`를 입력하면 관리자 세션으로 들어가며 기존처럼 모든 팀 입력 페이지를 선택할 수 있습니다.
+시작 화면에서 조와 PIN을 입력하면 해당 조 제출 화면으로 들어갑니다. 학생 세션에서는 조 선택을 바꿀 수 없고 자기 조 제출 기록만 볼 수 있습니다. `MASTER_CODE`를 입력하면 관리자 세션으로 들어가며 기존처럼 모든 조 입력 페이지를 선택할 수 있습니다.
 
 Apps Script 설정 위치:
 

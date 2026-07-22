@@ -180,7 +180,7 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
   const handleReset = useCallback(() => {
     if (!teamName) return;
 
-    const shouldReset = window.confirm(`${teamName} 팀의 저장된 답안을 초기화할까요?`);
+    const shouldReset = window.confirm(`${teamName}의 저장된 답안을 초기화할까요?`);
     if (!shouldReset) return;
 
     clearProgress(puzzle.puzzleId, teamName);

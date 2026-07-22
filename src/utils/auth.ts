@@ -1,4 +1,5 @@
 import { puzzle } from "../data/puzzle";
+import { teams } from "../data/teams";
 
 export type AuthRole = "team" | "admin";
 
@@ -32,6 +33,7 @@ function cleanSession(value: unknown): AuthSession | null {
   }
 
   if (session.role === "team" && typeof session.teamName !== "string") return null;
+  if (session.role === "team" && !teams.includes(session.teamName as (typeof teams)[number])) return null;
 
   return {
     authenticatedAt: session.authenticatedAt,
@@ -87,7 +89,7 @@ async function readVerifyResponse(response: Response): Promise<VerifyAccessRespo
 export async function verifyAccess(teamName: string, pin: string): Promise<AuthSession> {
   const endpoint = import.meta.env.VITE_SUBMISSION_ENDPOINT?.trim();
   if (!endpoint) {
-    throw new Error("팀 PIN 인증을 사용하려면 VITE_SUBMISSION_ENDPOINT가 필요합니다.");
+    throw new Error("조 PIN 인증을 사용하려면 VITE_SUBMISSION_ENDPOINT가 필요합니다.");
   }
 
   const response = await fetch(endpoint, {

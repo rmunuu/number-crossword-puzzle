@@ -104,7 +104,7 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
       <main className="leaderboard-main">
         {message ? <p className="leaderboard-message">{message}</p> : null}
 
-        <section className="leaderboard-table-wrap" aria-label="팀별 순위">
+        <section className="leaderboard-table-wrap" aria-label="조별 순위">
           {isLoading ? (
             <div className="leaderboard-empty">불러오는 중</div>
           ) : entries.length === 0 ? (
@@ -114,7 +114,7 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
               <thead>
                 <tr>
                   <th>순위</th>
-                  <th>팀명</th>
+                  <th>조명</th>
                   <th>맞힌 개수</th>
                   <th>남은 횟수</th>
                   <th>제출 시각</th>

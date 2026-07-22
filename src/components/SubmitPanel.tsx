@@ -37,7 +37,7 @@ export function SubmitPanel({
       <div>
         {teamSelector ?? (
           <>
-            <span className="panel-label">팀</span>
+            <span className="panel-label">조</span>
             <strong>{teamName || "미선택"}</strong>
           </>
         )}

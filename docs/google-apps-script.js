@@ -185,7 +185,7 @@ function verifyAccess(teamName, pin) {
   }
 
   if (!submittedTeamName) {
-    throw new Error("Team is required.");
+    throw new Error("조를 선택해야 합니다.");
   }
 
   const teamCodes = getTeamCodes();
@@ -224,7 +224,7 @@ function appendSubmission(payload) {
   ensureHeader(sheet);
   const existingRoundCount = getSubmittedRoundCount(payload.puzzleId, payload.teamName);
   if (existingRoundCount >= MAX_SUBMISSION_ROUNDS) {
-    throw new Error("이 팀은 제출 기회를 모두 사용했습니다.");
+    throw new Error("이 조는 제출 기회를 모두 사용했습니다.");
   }
 
   const submittedAt = payload.submittedAt || new Date().toISOString();

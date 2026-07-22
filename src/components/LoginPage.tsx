@@ -46,9 +46,9 @@ export function LoginPage({ onAuthenticated, onOpenLeaderboard }: LoginPageProps
 
         <form className="login-form" onSubmit={handleSubmit}>
           <label>
-            <span>팀</span>
+            <span>조</span>
             <select value={teamName} onChange={(event) => setTeamName(event.target.value)}>
-              <option value="">master code 또는 팀 선택</option>
+              <option value="">master code 또는 조 선택</option>
               {teams.map((team) => (
                 <option key={team} value={team}>
                   {team}
