@@ -33,11 +33,11 @@ VITE_BASE_PATH=
 
 팀은 드롭다운에서만 선택합니다.
 
-- 수통 1팀, 2팀, 3팀, 4팀, 5팀
-- 물리 1/2팀, 3/4팀, 5/6팀, 7/8팀
-- 천문 1/2팀, 3/4팀
-- 화학 1/2팀, 3/4팀, 5/6팀, 7/8팀, 9/10팀
-- 생명 1/2팀, 3/4팀, 5/6팀, 7/8팀
+- 수통 1팀, 2팀, 3팀, 4팀, 5팀, 6팀
+- 물리 1팀, 2팀, 3팀, 4팀, 5팀, 6팀, 7팀, 8팀
+- 천문 1팀, 2팀, 3팀, 4팀
+- 화학 1팀, 2팀, 3팀, 4팀, 5팀, 6팀, 7팀, 8팀, 9팀, 10팀
+- 생명 1팀, 2팀, 3팀, 4팀, 5팀, 6팀, 7팀, 8팀
 - 지구 1팀, 2팀, 3팀, 4팀, 5팀
 
 ## 입력 키
@@ -88,7 +88,7 @@ Apps Script의 Script Properties에는 아래 값을 넣습니다.
 - `MASTER_CODE`: 관리자 로그인 및 전체 초기화 코드
 - `ADMIN_CODE`: 기존 초기화 코드, 초기화에는 `MASTER_CODE`와 `ADMIN_CODE` 둘 다 사용할 수 있음
 
-팀별 PIN 원본은 로컬의 `team-pins.private.json.local`에 둡니다. 이 파일은 GitHub에 올리지 않습니다.
+팀별 PIN 원본은 로컬의 `team-pins.private.json`에 둡니다. 이 파일은 GitHub에 올리지 않습니다.
 
 Sheet 컬럼 예시:
 
@@ -112,7 +112,7 @@ Apps Script 설정 위치:
 
 1. Apps Script 편집기 왼쪽 톱니바퀴 `프로젝트 설정`으로 이동합니다.
 2. `스크립트 속성`에서 `스크립트 속성 추가`를 누릅니다.
-3. `TEAM_CODES_JSON` 이름으로 `team-pins.private.json.local`의 `TEAM_CODES_JSON` 객체를 붙여 넣습니다.
+3. `TEAM_CODES_JSON` 이름으로 `team-pins.private.json`의 `TEAM_CODES_JSON` 객체를 붙여 넣습니다.
 4. `MASTER_CODE` 이름으로 같은 파일의 `MASTER_CODE` 값을 넣습니다.
 5. `배포` → `배포 관리` → 웹앱 배포의 연필 버튼 → `버전`에서 `새 버전` → `배포`를 누릅니다.
 
