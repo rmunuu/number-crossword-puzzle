@@ -7,6 +7,11 @@ interface LeaderboardPageProps {
   onBack: () => void;
 }
 
+interface RefreshLeaderboardOptions {
+  signal?: AbortSignal;
+  silent?: boolean;
+}
+
 export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,34 +19,64 @@ export function LeaderboardPage({ onBack }: LeaderboardPageProps) {
   const [message, setMessage] = useState("");
   const [source, setSource] = useState<"endpoint" | "local">("local");
 
-  const refreshLeaderboard = useCallback(async (options: { silent?: boolean } = {}) => {
+  const refreshLeaderboard = useCallback(async (options: RefreshLeaderboardOptions = {}) => {
     if (!options.silent) setIsLoading(true);
     setMessage("");
 
     try {
-      const result = await loadLeaderboard();
+      const result = await loadLeaderboard(options.signal);
+      if (options.signal?.aborted) return;
+
       setEntries(result.entries);
       setSource(result.source);
       if (result.source === "local") {
         setMessage("제출 endpoint가 없어 이 브라우저의 기록만 표시합니다.");
       }
     } catch (error) {
+      if (options.signal?.aborted) return;
       setMessage(error instanceof Error ? error.message : "리더보드를 불러오지 못했습니다.");
     } finally {
-      if (!options.silent) setIsLoading(false);
+      if (!options.silent && !options.signal?.aborted) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void refreshLeaderboard();
-  }, [refreshLeaderboard]);
+    const abortController = new AbortController();
+    let isRefreshing = false;
+    let hasStartedInitialLoad = false;
 
-  useEffect(() => {
-    const refreshIntervalId = window.setInterval(() => {
-      void refreshLeaderboard({ silent: true });
-    }, 10_000);
+    async function pollLeaderboard() {
+      if (document.visibilityState === "hidden" || isRefreshing) return;
 
-    return () => window.clearInterval(refreshIntervalId);
+      const silent = hasStartedInitialLoad;
+      hasStartedInitialLoad = true;
+      isRefreshing = true;
+
+      try {
+        await refreshLeaderboard({
+          signal: abortController.signal,
+          silent
+        });
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        void pollLeaderboard();
+      }
+    }
+
+    void pollLeaderboard();
+    const refreshIntervalId = window.setInterval(pollLeaderboard, 10_000);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      abortController.abort();
+      window.clearInterval(refreshIntervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [refreshLeaderboard]);
 
   const handleReset = useCallback(async () => {

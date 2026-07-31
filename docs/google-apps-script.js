@@ -218,45 +218,53 @@ function requireSubmissionAccess(payload) {
 }
 
 function appendSubmission(payload) {
-  requireSubmissionAccess(payload);
+  const lock = LockService.getScriptLock();
 
-  const sheet = getSubmissionSheet();
-  ensureHeader(sheet);
-  const existingRoundCount = getSubmittedRoundCount(payload.puzzleId, payload.teamName);
-  if (existingRoundCount >= MAX_SUBMISSION_ROUNDS) {
-    throw new Error("이 조는 제출 기회를 모두 사용했습니다.");
+  if (!lock.tryLock(10000)) {
+    throw new Error("현재 제출 요청이 몰리고 있습니다. 잠시 후 다시 제출해 주세요.");
   }
 
-  const submittedAt = payload.submittedAt || new Date().toISOString();
-  const round = existingRoundCount + 1;
+  try {
+    requireSubmissionAccess(payload);
 
-  sheet.appendRow([
-    submittedAt,
-    payload.puzzleId,
-    payload.teamName,
-    round,
-    MAX_SUBMISSION_ROUNDS,
-    payload.score.filledCells,
-    payload.score.correctCells,
-    payload.score.incorrectCells,
-    payload.score.totalCells,
-    payload.score.isPerfect,
-    JSON.stringify(payload.answers),
-    payload.userAgent || ""
-  ]);
+    const sheet = getSubmissionSheet();
+    ensureHeader(sheet);
+    const existingRoundCount = getSubmittedRoundCount(payload.puzzleId, payload.teamName, sheet);
+    if (existingRoundCount >= MAX_SUBMISSION_ROUNDS) {
+      throw new Error("이 조는 제출 기회를 모두 사용했습니다.");
+    }
 
-  return {
-    round,
-    submittedAt,
-    maxRounds: MAX_SUBMISSION_ROUNDS,
-    remainingRounds: Math.max(0, MAX_SUBMISSION_ROUNDS - round)
-  };
+    const submittedAt = payload.submittedAt || new Date().toISOString();
+    const round = existingRoundCount + 1;
+
+    sheet.appendRow([
+      submittedAt,
+      payload.puzzleId,
+      payload.teamName,
+      round,
+      MAX_SUBMISSION_ROUNDS,
+      payload.score.filledCells,
+      payload.score.correctCells,
+      payload.score.incorrectCells,
+      payload.score.totalCells,
+      payload.score.isPerfect,
+      JSON.stringify(payload.answers),
+      payload.userAgent || ""
+    ]);
+    SpreadsheetApp.flush();
+
+    return {
+      round,
+      submittedAt,
+      maxRounds: MAX_SUBMISSION_ROUNDS,
+      remainingRounds: Math.max(0, MAX_SUBMISSION_ROUNDS - round)
+    };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
-function getSubmittedRoundCount(puzzleId, teamName) {
-  const sheet = getSubmissionSheet();
-  ensureHeader(sheet);
-
+function getSubmittedRoundCount(puzzleId, teamName, sheet) {
   const rounds = {};
   getDataRows(sheet).forEach((row) => {
     if (puzzleId && row[1] !== puzzleId) return;

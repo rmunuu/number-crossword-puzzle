@@ -131,7 +131,7 @@ function getEndpointResetAt(value: unknown): string | undefined {
   return typeof resetAt === "string" ? resetAt : undefined;
 }
 
-export async function loadLeaderboard(): Promise<LeaderboardResult> {
+export async function loadLeaderboard(signal?: AbortSignal): Promise<LeaderboardResult> {
   const endpoint = import.meta.env.VITE_SUBMISSION_ENDPOINT?.trim();
 
   if (!endpoint) {
@@ -146,7 +146,8 @@ export async function loadLeaderboard(): Promise<LeaderboardResult> {
   url.searchParams.set("puzzleId", puzzle.puzzleId);
 
   const response = await fetch(url.toString(), {
-    method: "GET"
+    method: "GET",
+    signal
   });
 
   if (!response.ok) {
