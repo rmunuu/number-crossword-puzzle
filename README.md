@@ -76,7 +76,7 @@ export const solution: Record<number, CellValue> = {
 
 조별로 최대 3번 제출할 수 있습니다. 각 제출은 즉시 채점되고, 제출 기록은 브라우저 localStorage에 저장되어 다시 확인할 수 있습니다. 기록을 선택하면 제출 당시 답안만 보이고, 맞은 칸은 연한 파랑, 틀린 칸은 연한 빨강으로 표시됩니다. 선택한 기록은 현재 입력 화면으로 복사해 수정한 뒤 다음 회차로 다시 제출할 수 있습니다.
 
-`VITE_SUBMISSION_ENDPOINT`가 있으면 Google Apps Script Web App으로 POST합니다. 없으면 제출 기록은 현재 브라우저 localStorage에만 저장됩니다. payload는 콘솔에도 출력됩니다.
+`VITE_SUBMISSION_ENDPOINT`가 있으면 Google Apps Script Web App으로 POST하고, 제출 화면의 제출 기록과 남은 제출기회도 서버 기록을 기준으로 동기화합니다. 없으면 제출 기록은 현재 브라우저 localStorage에만 저장됩니다. payload는 콘솔에도 출력됩니다.
 
 Google Sheets용 Apps Script 예시는 `docs/google-apps-script.js`에 있습니다.
 

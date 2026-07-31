@@ -62,6 +62,13 @@ function doPost(e) {
       return jsonResponse({ ok: true, resetAt });
     }
 
+    if (payload.action === "submissionHistory") {
+      return jsonResponse({
+        ok: true,
+        entries: getSubmissionHistoryEntries(payload.puzzleId, payload.teamName, payload.authToken)
+      });
+    }
+
     const result = appendSubmission(payload);
     return jsonResponse({ ok: true, ...result });
   } catch (error) {
@@ -277,6 +284,57 @@ function getSubmittedRoundCount(puzzleId, teamName, sheet) {
   });
 
   return Object.keys(rounds).length;
+}
+
+function getSubmissionHistoryEntries(puzzleId, teamName, authToken) {
+  requireSubmissionAccess({
+    authToken,
+    teamName
+  });
+
+  const sheet = getSubmissionSheet();
+  ensureHeader(sheet);
+
+  const roundMap = {};
+  getDataRows(sheet)
+    .filter((row) => {
+      if (puzzleId && row[1] !== puzzleId) return false;
+      return row[2] === teamName;
+    })
+    .forEach((row) => {
+      const submittedAt = toIsoString(row[0]);
+      const round = Number(row[3] || 0);
+      const answers = parseAnswersJson(row[10]);
+
+      roundMap[String(round || 0)] = {
+        id: [row[1], row[2], round, submittedAt].join(":"),
+        round,
+        submittedAt,
+        answers,
+        score: {
+          filledCells: Number(row[5] || 0),
+          correctCells: Number(row[6] || 0),
+          incorrectCells: Number(row[7] || 0),
+          totalCells: Number(row[8] || 0),
+          isPerfect: row[9] === true || String(row[9]).toLowerCase() === "true"
+        }
+      };
+    });
+
+  return Object.keys(roundMap)
+    .map((round) => roundMap[round])
+    .sort((a, b) => a.round - b.round || new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+}
+
+function parseAnswersJson(value) {
+  if (!value) return {};
+
+  try {
+    const parsed = JSON.parse(String(value));
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (error) {
+    return {};
+  }
 }
 
 function getLeaderboardEntries(puzzleId) {

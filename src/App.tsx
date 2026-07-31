@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClueList } from "./components/ClueList";
 import { Header } from "./components/Header";
 import { InputGuideModal } from "./components/InputGuideModal";
@@ -17,6 +17,7 @@ import { clearProgress, loadProgress, saveProgress } from "./hooks/useLocalStora
 import { useKeyboardInput } from "./hooks/useKeyboardInput";
 import { usePuzzleInput } from "./hooks/usePuzzleInput";
 import { clearAuthSession, loadAuthSession, saveAuthSession, type AuthSession } from "./utils/auth";
+import { loadRemoteSubmissionHistory } from "./utils/remoteSubmissionHistory";
 import { scoreAnswers, type ScoreResult } from "./utils/scoring";
 import { createSubmissionPayload, submitPayload } from "./utils/submission";
 import {
@@ -80,6 +81,7 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionHistory, setSubmissionHistory] = useState<SubmissionRecord[]>([]);
   const [reviewRecordId, setReviewRecordId] = useState<string | null>(null);
+  const selectedTeamRef = useRef("");
 
   const {
     answers,
@@ -119,10 +121,35 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
     saveProgress(puzzle.puzzleId, teamName, answers);
   }, [answers, teamName]);
 
+  const applySubmissionHistory = useCallback((nextTeamName: string, records: SubmissionRecord[]) => {
+    saveSubmissionHistory(puzzle.puzzleId, nextTeamName, records);
+    setSubmissionHistory(records);
+    setReviewRecordId(records[records.length - 1]?.id ?? null);
+  }, []);
+
+  const syncSubmissionHistory = useCallback(
+    async (nextTeamName: string) => {
+      try {
+        const remoteHistory = await loadRemoteSubmissionHistory({
+          authToken: session.token,
+          puzzleId: puzzle.puzzleId,
+          teamName: nextTeamName
+        });
+        if (!remoteHistory || selectedTeamRef.current !== nextTeamName) return;
+
+        applySubmissionHistory(nextTeamName, remoteHistory);
+      } catch (error) {
+        console.warn("Submission history sync failed", error);
+      }
+    },
+    [applySubmissionHistory, session.token]
+  );
+
   const handleTeamChange = useCallback(
     (nextTeamName: string) => {
       if (!isAdmin && nextTeamName !== session.teamName) return;
 
+      selectedTeamRef.current = nextTeamName;
       setTeamName(nextTeamName);
       setLastScore(null);
       setModal(null);
@@ -137,10 +164,10 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
       const savedProgress = loadProgress(puzzle.puzzleId, nextTeamName);
       const savedHistory = loadSubmissionHistory(puzzle.puzzleId, nextTeamName);
       resetAnswers(savedProgress?.answers ?? {});
-      setSubmissionHistory(savedHistory);
-      setReviewRecordId(savedHistory[savedHistory.length - 1]?.id ?? null);
+      applySubmissionHistory(nextTeamName, savedHistory);
+      void syncSubmissionHistory(nextTeamName);
     },
-    [isAdmin, resetAnswers, session.teamName]
+    [applySubmissionHistory, isAdmin, resetAnswers, session.teamName, syncSubmissionHistory]
   );
 
   useEffect(() => {
@@ -209,10 +236,12 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
         delivery: result.delivery
       };
       const nextHistory = [...submissionHistory, record];
-      setSubmissionHistory(nextHistory);
-      saveSubmissionHistory(puzzle.puzzleId, teamName, nextHistory);
+      applySubmissionHistory(teamName, nextHistory);
       setReviewRecordId(record.id);
       setLastScore(score);
+      if (result.delivery === "endpoint") {
+        void syncSubmissionHistory(teamName);
+      }
       setModal({
         kind: "success",
         message:
@@ -228,7 +257,7 @@ function SubmitApp({ onLogout, onOpenLeaderboard, session }: SubmitAppProps) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [answers, session.token, submissionHistory, teamName]);
+  }, [answers, applySubmissionHistory, session.token, submissionHistory, syncSubmissionHistory, teamName]);
 
   const handleSubmitRequest = useCallback(() => {
     if (!teamName) return;
